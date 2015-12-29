@@ -11,6 +11,13 @@
 
 This repository contains a library written in Python (with a bit of C) and complementary lecture materials for the [Audio Signal Processing for Music Applications](https://www.coursera.org/course/audio) course.
 
+## Forks
+
+There is the official repository (MTG) and many forks. This one is maintained, heavily refactored, has better API, docs, etc. but it is not backwards compatible with the current ASPMA assignments and instructional videos. For general usage of the library it is recommended to use this fork.
+
+- https://github.com/MTG/sms-tools.git - the official repository (may not be up-to-date)
+- https://github.com/bzamecnik/sms-tools.git - a maintained fork (this repo)
+
 ## Project structure
 
 - `smst` - the SMS tools Python package
@@ -35,18 +42,25 @@ Optional:
 
 ## How to install?
 
-### This repository
+Make sure you have Python installed (see below).
 
-This repository contains not only the sms-tools package but also the files
-for the ASPMA course.
+In case you just want to use the library, install it from PyPI. This automatically install its dependendies.
+
+```
+$pip install smst
+```
+
+In case you're taking the ASPMA course or would like to use the example sounds and scripts or you would like to develop and extend the algorithms, obtain the whole source repository and build the package yourself.
+
+### The repository
 
 If you have `git` installed, just clone the repository:
 
 ```
-git clone https://github.com/MTG/sms-tools.git
+git clone https://github.com/bzamecnik/sms-tools.git
 ```
 
-Otherwise [download the current version as a ZIP](https://github.com/MTG/sms-tools/archive/master.zip) and extract it.
+Otherwise [download the current version as a ZIP](https://github.com/bzamecnik/sms-tools/archive/master.zip) and extract it.
 
 ### Python & its packages
 
@@ -54,7 +68,7 @@ Otherwise [download the current version as a ZIP](https://github.com/MTG/sms-too
 
 The easiest and free way to install a working Python environment is [Anaconda](https://www.continuum.io/downloads). It has most of the required dependendies already bundled. However, you can also try the packages provided by you platform's native package system (apt, brew, etc.).
 
-```
+```python
 # make sure Anaconda is installed
 # create a virtual environment (eg. named 'smstools')
 # make sure to install matplotlib via conda before installing it via pip!
@@ -187,18 +201,22 @@ Audio can be transformed by modifying its model. Each transformation belongs to 
   - `scaleTime()`
   - `morph()`
 
-## How to generate documentation?
+## Documentation
 
-API documentation can be generated via Sphinx.
+The current [documentation](http://smst.readthedocs.org/en/latest/) is hosted on ReadTheDocs.org.
 
-Regenerate the documentation file for API reference.
+### How to generate documentation?
+
+In case you want to manually generate the documentation using Sphinx take the following steps.
+
+Regenerate the API reference into RST (reStructuredText) files.
 
 ```
 sms-tools$ cd docs/
 docs$ make apidoc
 ```
 
-Build the documentation into HTML.
+Build the documentation from RST into HTML.
 
 ```
 sms-tools$ python setup.py build_sphinx
