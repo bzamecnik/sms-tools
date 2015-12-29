@@ -2,7 +2,16 @@
 
 ## Next release
 
-- [#36](https://github.com/bzamecnik/sms-tools/issues/36) Utility module was split into submodules based on the usage.
+## 0.3.0 (2015-12-30)
+
+- [#3](https://github.com/bzamecnik/sms-tools/issues/3) - code refactoring
+  - the DFT model completely refactored to be more readable
+  - API methods renamed to more descriptive names and underscore-lowercase
+    - this breaks compatibility with the previous version
+  - classes in the GUI renamed
+  - [#36](https://github.com/bzamecnik/sms-tools/issues/36) utility module was split into submodules based on the usage
+- [#10](https://github.com/bzamecnik/sms-tools/issues/10) code mostly formatted according to PEP8, imports optimized
+- documentation build using Sphinx and published on [ReadTheDocs.org](https://smst.readthedocs.org/)
 
 ## 0.2.0 (2015-12-28)
 

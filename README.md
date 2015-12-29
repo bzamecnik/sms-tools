@@ -223,6 +223,10 @@ sms-tools$ python setup.py build_sphinx
 sms-tools$ open build/html/index.html
 ```
 
+## History of releases
+
+[Changelog](CHANGELOG.md) - releases with their major changes.
+
 ## Authors
 
 The [people](AUTHORS) who contributed to this software.
