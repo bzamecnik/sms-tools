@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/smst.svg)](https://pypi.python.org/pypi/smst)
 [![Build Status](https://travis-ci.org/bzamecnik/sms-tools.svg?branch=master)](https://travis-ci.org/bzamecnik/sms-tools)
-[![Read The Docs](https://readthedocs.org/projects/smst/badge/?version=latest)](http://smst.readthedocs.org/en/latest/?badge=latest)
+[![Read The Docs](https://readthedocs.org/projects/smst/badge/?version=latest)](https://smst.readthedocs.org/en/latest/?badge=latest)
 [![Chat of Gitter](https://img.shields.io/gitter/room/bzamecnik/sms-tools.svg)](https://gitter.im/bzamecnik/sms-tools)
 ![Python versions](https://img.shields.io/pypi/pyversions/smst.svg)
 ![License](https://img.shields.io/pypi/l/smst.svg)
