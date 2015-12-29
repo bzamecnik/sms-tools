@@ -16,6 +16,7 @@ import numpy as np
 from codecs import open
 
 from os import path
+import re
 
 # here = path.abspath(path.dirname(__file__))
 
@@ -36,13 +37,30 @@ ext_modules = [Extension(
     include_dirs=[np.get_include()]
 )]
 
+def read_version():
+    """
+    Reads the project version without importing the module.
+    This prevent importing a wrong module and importing the module before its
+    dependencies are built.
+    """
+    version = ''
+    with open('smst/__init__.py', 'r') as file:
+        version = re.search(
+            r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+            file.read(),
+            re.MULTILINE
+        ).group(1)
+    if not version:
+        raise RuntimeError('Could not find package version from __init__.py')
+    return version
+
 setup(
     name='smst',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.2.0',
+    version=read_version(),
 
     description='SMS tools - spectral audio modeling/synthesis/transformations',
     # long_description=long_description,
