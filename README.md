@@ -6,7 +6,6 @@
 [![Chat of Gitter](https://img.shields.io/gitter/room/bzamecnik/sms-tools.svg)](https://gitter.im/bzamecnik/sms-tools)
 ![Supported Python versions](https://img.shields.io/pypi/pyversions/smst.svg)
 ![License](https://img.shields.io/pypi/l/smst.svg)
-![PyPI downloads/month](https://img.shields.io/pypi/dm/smst.svg)
 
 [SMS Tools](http://mtg.upf.edu/technologies/sms) is a set of techniques and software implementations for the analysis, transformation and synthesis of musical sounds based on various spectral modeling approaches. These techniques can be used for synthesis, processing and coding applications, while some of the intermediate results might also be applied to other music related problems, such as sound source separation, musical acoustics, music perception, or performance analysis. The basic model and implementation was developed in the PhD thesis by X. Serra in 1989 and since then many extensions have been proposed at [MTG-UPF](http://mtg.upf.edu/) and by other researchers.
 
