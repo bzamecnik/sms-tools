@@ -25,8 +25,7 @@ def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, min
     if minSineDur < 0:  # raise exception if minSineDur is smaller than 0
         raise ValueError("Minimum duration of sine tracks smaller than 0")
 
-    hM1 = int(math.floor((w.size + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(w.size / 2))  # half analysis window size by floor
+    hM1, hM2 = dft.half_window_sizes(w.size)
     x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(hM2))  # add zeros at the end to analyze last sample
     pin = hM1  # init sound pointer in middle of anal window
@@ -124,8 +123,7 @@ def find_fundamental_freq(x, fs, w, N, H, t, minf0, maxf0, f0et):
     if H <= 0:  # raise error if hop size 0 or negative
         raise ValueError("Hop size (H) smaller or equal to 0")
 
-    hM1 = int(math.floor((w.size + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(w.size / 2))  # half analysis window size by floor
+    hM1, hM2 = dft.half_window_sizes(w.size)
     x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(hM1))  # add zeros at the end to analyze last sample
     pin = hM1  # init sound pointer in middle of anal window

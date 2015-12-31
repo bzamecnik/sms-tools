@@ -19,8 +19,7 @@ def from_audio(x, w, N, H):
         raise ValueError("Hop size (H) smaller or equal to 0")
 
     M = w.size  # size of analysis window
-    hM1 = int(math.floor((M + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(M / 2))  # half analysis window size by floor
+    hM1, hM2 = dft.half_window_sizes(M)
     x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(hM2))  # add zeros at the end to analyze last sample
     pin = hM1  # initialize sound pointer in middle of analysis window
@@ -45,8 +44,7 @@ def to_audio(mY, pY, M, H):
     mY: magnitude spectra, pY: phase spectra, M: window size, H: hop-size
     returns y: output sound
     """
-    hM1 = int(math.floor((M + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(M / 2))  # half analysis window size by floor
+    hM1, hM2 = dft.half_window_sizes(M)
     nFrames = mY[:, 0].size  # number of frames
     y = np.zeros(nFrames * H + hM1 + hM2)  # initialize output array
     pin = hM1
@@ -71,8 +69,7 @@ def filter(x, fs, w, N, H, filter):
     """
 
     M = w.size  # size of analysis window
-    hM1 = int(math.floor((M + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(M / 2))  # half analysis window size by floor
+    hM1, hM2 = dft.half_window_sizes(M)
     x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(hM1))  # add zeros at the end to analyze last sample
     pin = hM1  # initialize sound pointer in middle of analysis window
