@@ -25,11 +25,10 @@ def from_audio(x, fs, w, N, H, t, maxnSines=100, minSineDur=.01, freqDevOffset=2
         raise ValueError("Minimum duration of sine tracks smaller than 0")
 
     hM1, hM2 = dft.half_window_sizes(w.size)
-    x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
-    x = np.append(x, np.zeros(hM2))  # add zeros at the end to analyze last sample
+    x_padded = stft.pad_signal(x, hM2)
     w = w / sum(w)  # normalize analysis window
     tfreq = np.array([])
-    for frame_index, x1 in enumerate(stft.iterate_analysis_frames(x, H, hM1, hM2)):
+    for frame_index, x1 in enumerate(stft.iterate_analysis_frames(x_padded, H, hM1, hM2)):
         mX, pX = dft.from_audio(x1, w, N)  # compute dft
         ploc = peaks.find_peaks(mX, t)  # detect locations of peaks
         iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values by interpolation

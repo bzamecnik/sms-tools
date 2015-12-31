@@ -20,10 +20,9 @@ def from_audio(x, w, N, H):
 
     M = w.size  # size of analysis window
     hM1, hM2 = dft.half_window_sizes(M)
-    x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
-    x = np.append(x, np.zeros(hM2))  # add zeros at the end to analyze last sample
+    x_padded = pad_signal(x, hM2)
     w = w / sum(w)  # normalize analysis window
-    for frame_index, x1 in enumerate(iterate_analysis_frames(x, H, hM1, hM2)):
+    for frame_index, x1 in enumerate(iterate_analysis_frames(x_padded, H, hM1, hM2)):
         mX, pX = dft.from_audio(x1, w, N)  # compute dft
         if frame_index == 0:  # if first frame create output arrays
             xmX = np.array([mX])
@@ -140,6 +139,11 @@ def morph(x1, x2, fs, w1, N1, w2, N2, H1, smoothf, balancef):
     y = np.delete(y, range(hM1_2))  # delete half of first window
     y = np.delete(y, range(y.size - hM1_1, y.size))  # add zeros at the end to analyze last sample
     return y
+
+def pad_signal(x, hM2):
+    x_padded = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
+    x_padded = np.append(x_padded, np.zeros(hM2))  # add zeros at the end to analyze last sample
+    return x_padded
 
 def iterate_analysis_frames(x, H, hM1, hM2):
     """
