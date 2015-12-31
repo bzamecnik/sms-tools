@@ -33,7 +33,7 @@ def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, min
     w = w / sum(w)  # normalize analysis window
     hfreqp = []  # initialize harmonic frequencies of previous frame
     f0stable = 0  # initialize f0 stable
-    while pin <= pend:
+    while pin < pend:
         x1 = x[pin - hM1:pin + hM2]  # select frame
         mX, pX = dft.from_audio(x1, w, N)  # compute dft
         ploc = peaks.find_peaks(mX, t)  # detect peak locations

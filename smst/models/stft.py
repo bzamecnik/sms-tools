@@ -25,7 +25,7 @@ def from_audio(x, w, N, H):
     pin = hM1  # initialize sound pointer in middle of analysis window
     pend = x.size - hM1  # last sample to start a frame
     w = w / sum(w)  # normalize analysis window
-    while pin <= pend:  # while sound pointer is smaller than last sample
+    while pin < pend:  # while sound pointer is smaller than last sample
         x1 = x[pin - hM1:pin + hM2]  # select one frame of input sound
         mX, pX = dft.from_audio(x1, w, N)  # compute dft
         if pin == hM1:  # if first frame create output arrays
@@ -76,7 +76,7 @@ def filter(x, fs, w, N, H, filter):
     pend = x.size - hM1  # last sample to start a frame
     w = w / sum(w)  # normalize analysis window
     y = np.zeros(x.size)  # initialize output array
-    while pin <= pend:  # while sound pointer is smaller than last sample
+    while pin < pend:  # while sound pointer is smaller than last sample
         # -----analysis-----
         x1 = x[pin - hM1:pin + hM2]  # select one frame of input sound
         mX, pX = dft.from_audio(x1, w, N)  # compute DFT

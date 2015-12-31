@@ -36,7 +36,7 @@ def from_audio(x, H, N, stocf):
     x = np.append(x, np.zeros(No2))  # add zeros at the end to analyze last sample
     pin = No2  # initialize sound pointer in middle of analysis window
     pend = x.size - No2  # last sample to start a frame
-    while pin <= pend:
+    while pin < pend:
         xw = x[pin - No2:pin + No2] * w  # window the input sound
         X = fft(xw)  # compute FFT
         mX = 20 * np.log10(abs(X[:hN]))  # magnitude spectrum of positive frequencies
