@@ -23,5 +23,5 @@ install:
   - python setup.py install
 # command to run tests
 script:
-  # only one simple test for the beginning
-  - py.test tests/dftModel_test.py
+  # some self-contained regression tests
+  - py.test tests/*Model_test.py
