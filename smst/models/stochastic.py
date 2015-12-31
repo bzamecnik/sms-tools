@@ -6,6 +6,7 @@ from scipy.interpolate import interp1d
 from scipy.signal import hanning, resample
 from scipy.fftpack import fft, ifft
 
+from . import stft
 from ..utils.math import is_power_of_two
 
 
@@ -34,18 +35,15 @@ def from_audio(x, H, N, stocf):
     w = hanning(N)  # analysis window
     x = np.append(np.zeros(No2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(No2))  # add zeros at the end to analyze last sample
-    pin = No2  # initialize sound pointer in middle of analysis window
-    pend = x.size - No2  # last sample to start a frame
-    while pin < pend:
-        xw = x[pin - No2:pin + No2] * w  # window the input sound
+    for frame_index, x1 in enumerate(stft.iterate_analysis_frames(x, H, No2, No2)):
+        xw = x1 * w  # window the input sound
         X = fft(xw)  # compute FFT
         mX = 20 * np.log10(abs(X[:hN]))  # magnitude spectrum of positive frequencies
         mY = resample(np.maximum(-200, mX), stocf * hN)  # decimate the mag spectrum
-        if pin == No2:  # first frame
+        if frame_index == 0:  # first frame
             stocEnv = np.array([mY])
         else:  # rest of frames
             stocEnv = np.vstack((stocEnv, np.array([mY])))
-        pin += H  # advance sound pointer
     return stocEnv
 
 

@@ -8,7 +8,7 @@ from scipy.interpolate import interp1d
 from scipy.signal import blackmanharris, triang
 from scipy.fftpack import ifft
 
-from . import dft, sine
+from . import dft, sine, stft
 from ..utils import peaks, synth
 
 
@@ -28,13 +28,10 @@ def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, min
     hM1, hM2 = dft.half_window_sizes(w.size)
     x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(hM2))  # add zeros at the end to analyze last sample
-    pin = hM1  # init sound pointer in middle of anal window
-    pend = x.size - hM1  # last sample to start a frame
     w = w / sum(w)  # normalize analysis window
     hfreqp = []  # initialize harmonic frequencies of previous frame
     f0stable = 0  # initialize f0 stable
-    while pin < pend:
-        x1 = x[pin - hM1:pin + hM2]  # select frame
+    for frame_index, x1 in enumerate(stft.iterate_analysis_frames(x, H, hM1, hM2)):
         mX, pX = dft.from_audio(x1, w, N)  # compute dft
         ploc = peaks.find_peaks(mX, t)  # detect peak locations
         iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values
@@ -47,7 +44,7 @@ def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, min
             f0stable = 0
         hfreq, hmag, hphase = find_harmonics(ipfreq, ipmag, ipphase, f0t, nH, hfreqp, fs, harmDevSlope)  # find harmonics
         hfreqp = hfreq
-        if pin == hM1:  # first frame
+        if frame_index == 0:  # first frame
             xhfreq = np.array([hfreq])
             xhmag = np.array([hmag])
             xhphase = np.array([hphase])
@@ -55,7 +52,6 @@ def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, min
             xhfreq = np.vstack((xhfreq, np.array([hfreq])))
             xhmag = np.vstack((xhmag, np.array([hmag])))
             xhphase = np.vstack((xhphase, np.array([hphase])))
-        pin += H  # advance sound pointer
     xhfreq = sine.clean_sinusoid_tracks(xhfreq, round(fs * minSineDur / H))  # delete tracks shorter than minSineDur
     return xhfreq, xhmag, xhphase
 
@@ -126,13 +122,10 @@ def find_fundamental_freq(x, fs, w, N, H, t, minf0, maxf0, f0et):
     hM1, hM2 = dft.half_window_sizes(w.size)
     x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(hM1))  # add zeros at the end to analyze last sample
-    pin = hM1  # init sound pointer in middle of anal window
-    pend = x.size - hM1  # last sample to start a frame
     w = w / sum(w)  # normalize analysis window
     f0 = []  # initialize f0 output
     f0stable = 0  # initialize f0 stable
-    while pin < pend:
-        x1 = x[pin - hM1:pin + hM2]  # select frame
+    for x1 in stft.iterate_analysis_frames(x, H, hM1, hM2):
         mX, pX = dft.from_audio(x1, w, N)  # compute dft
         ploc = peaks.find_peaks(mX, t)  # detect peak locations
         iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values
@@ -144,7 +137,6 @@ def find_fundamental_freq(x, fs, w, N, H, t, minf0, maxf0, f0et):
         else:
             f0stable = 0
         f0 = np.append(f0, f0t)  # add f0 to output array
-        pin += H  # advance sound pointer
     return f0
 
 

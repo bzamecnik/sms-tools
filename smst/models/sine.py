@@ -8,7 +8,7 @@ from scipy.interpolate import interp1d
 from scipy.signal import blackmanharris, triang
 from scipy.fftpack import ifft, fftshift
 
-from . import dft
+from . import dft, stft
 from ..utils import peaks, synth
 
 
@@ -27,12 +27,9 @@ def from_audio(x, fs, w, N, H, t, maxnSines=100, minSineDur=.01, freqDevOffset=2
     hM1, hM2 = dft.half_window_sizes(w.size)
     x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(hM2))  # add zeros at the end to analyze last sample
-    pin = hM1  # initialize sound pointer in middle of analysis window
-    pend = x.size - hM1  # last sample to start a frame
     w = w / sum(w)  # normalize analysis window
     tfreq = np.array([])
-    while pin < pend:  # while input sound pointer is within sound
-        x1 = x[pin - hM1:pin + hM2]  # select frame
+    for frame_index, x1 in enumerate(stft.iterate_analysis_frames(x, H, hM1, hM2)):
         mX, pX = dft.from_audio(x1, w, N)  # compute dft
         ploc = peaks.find_peaks(mX, t)  # detect locations of peaks
         iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values by interpolation
@@ -48,7 +45,7 @@ def from_audio(x, fs, w, N, H, t, maxnSines=100, minSineDur=.01, freqDevOffset=2
         jtfreq[:tfreq.size] = tfreq  # save track frequencies to temporary array
         jtmag[:tmag.size] = tmag  # save track magnitudes to temporary array
         jtphase[:tphase.size] = tphase  # save track magnitudes to temporary array
-        if pin == hM1:  # if first frame initialize output sine tracks
+        if frame_index == 0:  # if first frame initialize output sine tracks
             xtfreq = jtfreq
             xtmag = jtmag
             xtphase = jtphase
@@ -56,7 +53,6 @@ def from_audio(x, fs, w, N, H, t, maxnSines=100, minSineDur=.01, freqDevOffset=2
             xtfreq = np.vstack((xtfreq, jtfreq))
             xtmag = np.vstack((xtmag, jtmag))
             xtphase = np.vstack((xtphase, jtphase))
-        pin += H
     # delete sine tracks shorter than minSineDur
     xtfreq = clean_sinusoid_tracks(xtfreq, round(fs * minSineDur / H))
     return xtfreq, xtmag, xtphase

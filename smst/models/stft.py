@@ -22,19 +22,15 @@ def from_audio(x, w, N, H):
     hM1, hM2 = dft.half_window_sizes(M)
     x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(hM2))  # add zeros at the end to analyze last sample
-    pin = hM1  # initialize sound pointer in middle of analysis window
-    pend = x.size - hM1  # last sample to start a frame
     w = w / sum(w)  # normalize analysis window
-    while pin < pend:  # while sound pointer is smaller than last sample
-        x1 = x[pin - hM1:pin + hM2]  # select one frame of input sound
+    for frame_index, x1 in enumerate(iterate_analysis_frames(x, H, hM1, hM2)):
         mX, pX = dft.from_audio(x1, w, N)  # compute dft
-        if pin == hM1:  # if first frame create output arrays
+        if frame_index == 0:  # if first frame create output arrays
             xmX = np.array([mX])
             xpX = np.array([pX])
         else:  # append output to existing array
             xmX = np.vstack((xmX, np.array([mX])))
             xpX = np.vstack((xpX, np.array([pX])))
-        pin += H  # advance sound pointer
     return xmX, xpX
 
 
@@ -144,3 +140,21 @@ def morph(x1, x2, fs, w1, N1, w2, N2, H1, smoothf, balancef):
     y = np.delete(y, range(hM1_2))  # delete half of first window
     y = np.delete(y, range(y.size - hM1_1, y.size))  # add zeros at the end to analyze last sample
     return y
+
+def iterate_analysis_frames(x, H, hM1, hM2):
+    """
+    Iterate over frames of input signal for analysis.
+
+    :param x: input signal
+    :param H: hop size
+    :param hM1: half analysis window size by rounding
+    :param hM2: half analysis window size by floor
+    :return: generator over frames of input signal
+    """
+    pin = hM1  # initialize sound pointer in middle of analysis window
+    pend = x.size - hM1  # last sample to start a frame
+    while pin < pend:  # while sound pointer is smaller than last sample
+        frame_start = pin - hM1
+        frame_end = pin + hM2
+        yield x[frame_start:frame_end]  # select one frame of input sound
+        pin += H  # advance sound pointer
