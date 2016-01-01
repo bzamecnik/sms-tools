@@ -9,7 +9,7 @@ import math
 import numpy as np
 from scipy.fftpack import fft, ifft
 
-from ..utils.math import is_power_of_two
+from ..utils.math import is_power_of_two, from_db_magnitudes, to_db_magnitudes
 
 
 def from_audio(samples, window, fft_size):
@@ -93,19 +93,14 @@ def select_phase_spectrum(spectrum, phase_eps=1e-14):
 
 def select_magnitude_db_spectrum(spectrum):
     """Computes magnitude spectrum in decibels from complex-valued spectrum."""
-    abs_spectrum = abs(spectrum)
-    # if zeros add epsilon to handle log
-    abs_spectrum[abs_spectrum < np.finfo(float).eps] = np.finfo(float).eps
-    # magnitude spectrum of positive frequencies in dB
-    magnitude_db_spectrum = 20 * np.log10(abs_spectrum)
-    return magnitude_db_spectrum
+    return to_db_magnitudes(spectrum)
 
 
 def spectrum_from_phase_and_magnitude(pos_magnitude_db_spectrum, pos_phase_spectrum, fft_size):
     # size of positive spectrum, it includes sample 0
     half_fft_size = pos_magnitude_db_spectrum.size
     spectrum = np.zeros(fft_size, dtype=complex)
-    pos_magnitude_spectrum = 10 ** (pos_magnitude_db_spectrum / 20)
+    pos_magnitude_spectrum = from_db_magnitudes(pos_magnitude_db_spectrum)
     # generate positive frequencies
     spectrum[:half_fft_size] = pos_magnitude_spectrum * np.exp(1j * pos_phase_spectrum)
     # generate negative frequencies

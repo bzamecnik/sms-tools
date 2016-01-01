@@ -13,7 +13,7 @@ from scipy.signal import hanning, resample
 from scipy.fftpack import fft, ifft
 
 from . import stft
-from ..utils.math import is_power_of_two
+from ..utils.math import is_power_of_two, from_db_magnitudes, to_db_magnitudes
 
 
 def from_audio(x, H, N, stocf):
@@ -48,7 +48,7 @@ def from_audio(x, H, N, stocf):
     for frame_index, x1 in enumerate(stft.iterate_analysis_frames(x, H, No2, No2)):
         xw = x1 * w  # window the input sound
         X = fft(xw)  # compute FFT
-        mX = 20 * np.log10(abs(X[:hN]))  # magnitude spectrum of positive frequencies
+        mX = to_db_magnitudes(X[:hN])  # magnitude spectrum of positive frequencies
         mY = resample(np.maximum(-200, mX), stocf * hN)  # decimate the mag spectrum
         stocEnv.append(mY)
     stocEnv = np.vstack(stocEnv)
@@ -79,8 +79,8 @@ def to_audio(stocEnv, H, N):
         mY = resample(stocEnv[l, :], hN)  # interpolate to original size
         pY = 2 * np.pi * np.random.rand(hN)  # generate phase random values
         Y = np.zeros(N, dtype=complex)  # initialize synthesis spectrum
-        Y[:hN] = 10 ** (mY / 20) * np.exp(1j * pY)  # generate positive freq.
-        Y[hN:] = 10 ** (mY[-2:0:-1] / 20) * np.exp(-1j * pY[-2:0:-1])  # generate negative freq.
+        Y[:hN] = from_db_magnitudes(mY) * np.exp(1j * pY)  # generate positive freq.
+        Y[hN:] = from_db_magnitudes(mY[-2:0:-1]) * np.exp(-1j * pY[-2:0:-1])  # generate negative freq.
         fftbuffer = np.real(ifft(Y))  # inverse FFT
         y[pout:pout + N] += ws * fftbuffer  # overlap-add
         pout += H

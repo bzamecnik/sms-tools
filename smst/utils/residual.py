@@ -3,7 +3,7 @@ from scipy.fftpack import fft, ifft, fftshift
 from scipy.signal import resample, blackmanharris, triang
 
 from .utilFunctions_C import utilFunctions_C as UF_C
-
+from .math import to_db_magnitudes
 
 def subtract_sinusoids(x, N, H, sfreq, smag, sphase, fs):
     """
@@ -69,7 +69,7 @@ def subtract_sinusoids_with_stochastic_residual(x, N, H, sfreq, smag, sphase, fs
         X = fft(fftshift(xw))  # compute FFT
         Yh = UF_C.genSpecSines(N * sfreq[l, :] / fs, smag[l, :], sphase[l, :], N)  # generate spec sines
         Xr = X - Yh  # subtract sines from original spectrum
-        mXr = 20 * np.log10(abs(Xr[:hN]))  # magnitude spectrum of residual
+        mXr = to_db_magnitudes(Xr[:hN])  # magnitude spectrum of residual
         mXrenv = resample(np.maximum(-200, mXr), mXr.size * stocf)  # decimate the mag spectrum
         if l == 0:  # if first frame
             stocEnv = np.array([mXrenv])

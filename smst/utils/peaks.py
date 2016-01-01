@@ -1,7 +1,7 @@
 import numpy as np
 
 from .utilFunctions_C import utilFunctions_C as UF_C
-
+from .math import from_db_magnitudes
 
 def find_peaks(mX, t):
     """
@@ -115,7 +115,7 @@ def find_fundamental_twm_py(pfreq, pmag, f0c):
         peakloc = np.argmin(difmatrixPM, axis=1)
         Ponddif = np.array(FreqDistance) * (np.array(harmonic.T) ** (-p))
         PeakMag = pmag[peakloc]
-        MagFactor = 10 ** ((PeakMag - Amax) / 20)
+        MagFactor = from_db_magnitudes(PeakMag - Amax)
         ErrorPM = ErrorPM + (Ponddif + MagFactor * (q * Ponddif - r)).T
         harmonic += f0c
 
@@ -127,7 +127,7 @@ def find_fundamental_twm_py(pfreq, pmag, f0c):
         FreqDistance = abs(pfreq[:MaxNMP] - nharm * f0c[i])
         Ponddif = FreqDistance * (pfreq[:MaxNMP] ** (-p))
         PeakMag = pmag[:MaxNMP]
-        MagFactor = 10 ** ((PeakMag - Amax) / 20)
+        MagFactor = from_db_magnitudes(PeakMag - Amax)
         ErrorMP[i] = sum(MagFactor * (Ponddif + MagFactor * (q * Ponddif - r)))
 
     Error = (ErrorPM[0] / MaxNPM) + (rho * ErrorMP / MaxNMP)  # total error

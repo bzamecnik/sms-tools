@@ -2,7 +2,7 @@ import numpy as np
 
 from .window import blackman_harris_lobe
 from .utilFunctions_C import utilFunctions_C as UF_C
-
+from .math import from_db_magnitudes
 
 def spectrum_for_sinusoids(ipfreq, ipmag, ipphase, N, fs):
     """
@@ -40,7 +40,7 @@ def spectrum_for_sinusoids_py(ipfreq, ipmag, ipphase, N, fs):
             continue
         binremainder = round(loc) - loc
         lb = np.arange(binremainder - 4, binremainder + 5)  # main lobe (real value) bins to read
-        lmag = blackman_harris_lobe(lb) * 10 ** (ipmag[i] / 20)  # lobe magnitudes of the complex exponential
+        lmag = blackman_harris_lobe(lb) * from_db_magnitudes(ipmag[i])  # lobe magnitudes of the complex exponential
         b = np.arange(round(loc) - 4, round(loc) + 5)
         for m in range(0, 9):
             if b[m] < 0:  # peak lobe crosses DC bin
