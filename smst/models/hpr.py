@@ -27,9 +27,13 @@ def from_audio(x, fs, w, N, H, t, minSineDur, nH, minf0, maxf0, f0et, harmDevSlo
     """
 
     # perform harmonic analysis
-    hfreq, hmag, hphase = harmonic.from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope, minSineDur)
+    hfreq, hmag, hphase = harmonic.from_audio(
+        x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope, minSineDur)
+
+    # subtract sinusoids from original sound
     Ns = 512
-    xr = residual.subtract_sinusoids(x, Ns, H, hfreq, hmag, hphase, fs)  # subtract sinusoids from original sound
+    xr = residual.subtract_sinusoids(x, Ns, H, hfreq, hmag, hphase, fs)
+
     return hfreq, hmag, hphase, xr
 
 
@@ -47,6 +51,11 @@ def to_audio(hfreq, hmag, hphase, xr, N, H, fs):
     :returns: y: output sound, yh: harmonic component
     """
 
-    yh = sine.to_audio(hfreq, hmag, hphase, N, H, fs)  # synthesize sinusoids
-    y = yh[:min(yh.size, xr.size)] + xr[:min(yh.size, xr.size)]  # sum sinusoids and residual components
+    # synthesize sinusoids
+    yh = sine.to_audio(hfreq, hmag, hphase, N, H, fs)
+
+    # sum sinusoids and residual components
+    end = min(yh.size, xr.size)
+    y = yh[:end] + xr[:end]
+
     return y, yh

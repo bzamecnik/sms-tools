@@ -25,7 +25,8 @@ def from_audio(x, fs, w, N, H, t, minSineDur, maxnSines, freqDevOffset, freqDevS
     # perform sinusoidal analysis
     tfreq, tmag, tphase = sine.from_audio(x, fs, w, N, H, t, maxnSines, minSineDur, freqDevOffset, freqDevSlope)
     Ns = 512
-    xr = residual.subtract_sinusoids(x, Ns, H, tfreq, tmag, tphase, fs)  # subtract sinusoids from original sound
+    # subtract sinusoids from original sound
+    xr = residual.subtract_sinusoids(x, Ns, H, tfreq, tmag, tphase, fs)
     return tfreq, tmag, tphase, xr
 
 
@@ -45,6 +46,9 @@ def to_audio(tfreq, tmag, tphase, xr, N, H, fs):
       - ys: sinusoidal component
     """
 
-    ys = sine.to_audio(tfreq, tmag, tphase, N, H, fs)  # synthesize sinusoids
-    y = ys[:min(ys.size, xr.size)] + xr[:min(ys.size, xr.size)]  # sum sinusoids and residual components
+    # synthesize sinusoids
+    ys = sine.to_audio(tfreq, tmag, tphase, N, H, fs)
+    # sum sinusoids and residual components
+    end = min(ys.size, xr.size)
+    y = ys[:end] + xr[:end]
     return y, ys

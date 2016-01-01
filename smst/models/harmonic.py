@@ -33,31 +33,43 @@ def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, min
     hM1, hM2 = dft.half_window_sizes(w.size)
     x_padded = stft.pad_signal(x, hM2)
     w = w / sum(w)  # normalize analysis window
-    hfreqp = []  # initialize harmonic frequencies of previous frame
+    hfreq_prev = []  # initialize harmonic frequencies of previous frame
     f0stable = 0  # initialize f0 stable
-    for frame_index, x1 in enumerate(stft.iterate_analysis_frames(x_padded, H, hM1, hM2)):
-        mX, pX = dft.from_audio(x1, w, N)  # compute dft
-        ploc = peaks.find_peaks(mX, t)  # detect peak locations
+    xhfreq, xhmag, xhphase = [], [], []
+    for x_frame in stft.iterate_analysis_frames(x_padded, H, hM1, hM2):
+        # compute dft
+        mX, pX = dft.from_audio(x_frame, w, N)
+
+        # detect peak locations
+        ploc = peaks.find_peaks(mX, t)
         iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values
         ipfreq = fs * iploc / N  # convert locations to Hz
-        f0t = peaks.find_fundamental_twm(ipfreq, ipmag, f0et, minf0, maxf0, f0stable)  # find f0
+
+        # find fundamental frequency (f0)
+        f0t = peaks.find_fundamental_twm(ipfreq, ipmag, f0et, minf0, maxf0, f0stable)
         if ((f0stable == 0) & (f0t > 0)) \
                 or ((f0stable > 0) & (np.abs(f0stable - f0t) < f0stable / 5.0)):
             f0stable = f0t  # consider a stable f0 if it is close to the previous one
         else:
             f0stable = 0
-        hfreq, hmag, hphase = find_harmonics(ipfreq, ipmag, ipphase, f0t, nH, hfreqp, fs, harmDevSlope)  # find harmonics
-        hfreqp = hfreq
-        if frame_index == 0:  # first frame
-            xhfreq = np.array([hfreq])
-            xhmag = np.array([hmag])
-            xhphase = np.array([hphase])
-        else:  # next frames
-            xhfreq = np.vstack((xhfreq, np.array([hfreq])))
-            xhmag = np.vstack((xhmag, np.array([hmag])))
-            xhphase = np.vstack((xhphase, np.array([hphase])))
-    xhfreq = sine.clean_sinusoid_tracks(xhfreq, round(fs * minSineDur / H))  # delete tracks shorter than minSineDur
+
+        # find harmonics
+        hfreq, hmag, hphase = find_harmonics(ipfreq, ipmag, ipphase, f0t, nH, hfreq_prev, fs, harmDevSlope)
+        hfreq_prev = hfreq
+
+        # store the harmonics
+        xhfreq.append(hfreq)
+        xhmag.append(hmag)
+        xhphase.append(hphase)
+
+    xhfreq, xhmag, xhphase = [np.vstack(xh) for xh in (xhfreq, xhmag, xhphase)]
+
+    # delete tracks shorter than minSineDur
+    xhfreq = sine.clean_sinusoid_tracks(xhfreq, round(fs * minSineDur / H))
+
     return xhfreq, xhmag, xhphase
+
+# to_audio() is implemented in the sine model
 
 # transformations applied to the harmonics of a sound
 

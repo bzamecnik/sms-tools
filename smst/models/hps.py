@@ -34,7 +34,8 @@ def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope, minSineD
     """
 
     # perform harmonic analysis
-    hfreq, hmag, hphase = harmonic.from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope, minSineDur)
+    hfreq, hmag, hphase = harmonic.from_audio(
+        x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope, minSineDur)
     # subtract sinusoids from original sound
     xr = residual.subtract_sinusoids(x, Ns, H, hfreq, hmag, hphase, fs)
     # perform stochastic analysis of residual
@@ -58,9 +59,13 @@ def to_audio(hfreq, hmag, hphase, stocEnv, N, H, fs):
       - yst: stochastic component
     """
 
-    yh = sine.to_audio(hfreq, hmag, hphase, N, H, fs)  # synthesize harmonics
-    yst = stochastic.to_audio(stocEnv, H, H * 2)  # synthesize stochastic residual
-    y = yh[:min(yh.size, yst.size)] + yst[:min(yh.size, yst.size)]  # sum harmonic and stochastic components
+    # synthesize harmonics
+    yh = sine.to_audio(hfreq, hmag, hphase, N, H, fs)
+    # synthesize stochastic residual
+    yst = stochastic.to_audio(stocEnv, H, H * 2)
+    # sum harmonic and stochastic components
+    end = min(yh.size, yst.size)
+    y = yh[:end] + yst[:end]
     return y, yh, yst
 
 # functions that implement transformations using the hpsModel
@@ -80,20 +85,23 @@ def scale_time(hfreq, hmag, stocEnv, timeScaling):
         raise ValueError("Time scaling array does not have an even size")
 
     L = hfreq.shape[0]  # number of input frames
-    maxInTime = max(timeScaling[::2])  # maximum value used as input times
-    maxOutTime = max(timeScaling[1::2])  # maximum value used in output times
+    inputScaling = timeScaling[::2]
+    outputScaling = timeScaling[1::2]
+    maxInTime = max(inputScaling)  # maximum value used as input times
+    maxOutTime = max(outputScaling)  # maximum value used in output times
     outL = int(L * maxOutTime / maxInTime)  # number of output frames
-    inFrames = (L - 1) * timeScaling[::2] / maxInTime  # input time values in frames
-    outFrames = outL * timeScaling[1::2] / maxOutTime  # output time values in frames
+    inFrames = (L - 1) * inputScaling / maxInTime  # input time values in frames
+    outFrames = outL * outputScaling / maxOutTime  # output time values in frames
     timeScalingEnv = interp1d(outFrames, inFrames, fill_value=0)  # interpolation function
-    indexes = timeScalingEnv(np.arange(outL))  # generate frame indexes for the output
-    yhfreq = hfreq[round(indexes[0]), :]  # first output frame
-    yhmag = hmag[round(indexes[0]), :]  # first output frame
-    ystocEnv = stocEnv[round(indexes[0]), :]  # first output frame
-    for l in indexes[1:]:  # iterate over all output frame indexes
-        yhfreq = np.vstack((yhfreq, hfreq[round(l), :]))  # get the closest input frame
-        yhmag = np.vstack((yhmag, hmag[round(l), :]))  # get the closest input frame
-        ystocEnv = np.vstack((ystocEnv, stocEnv[round(l), :]))  # get the closest input frame
+
+    # generate frame indexes for the output
+    # round to get the closest input frame
+    indexes = [int(round(l)) for l in timeScalingEnv(np.arange(outL))]
+
+    yhfreq = hfreq[indexes]
+    yhmag = hmag[indexes]
+    ystocEnv = stocEnv[indexes]
+
     return yhfreq, yhmag, ystocEnv
 
 
@@ -120,29 +128,35 @@ def morph(hfreq1, hmag1, stocEnv1, hfreq2, hmag2, stocEnv2, hfreqIntp, hmagIntp,
 
     L1 = hfreq1.shape[0]  # number of frames of sound 1
     L2 = hfreq2.shape[0]  # number of frames of sound 2
-    hfreqIntp[::2] = (L1 - 1) * hfreqIntp[::2] / hfreqIntp[-2]  # normalize input values
-    hmagIntp[::2] = (L1 - 1) * hmagIntp[::2] / hmagIntp[-2]  # normalize input values
-    stocIntp[::2] = (L1 - 1) * stocIntp[::2] / stocIntp[-2]  # normalize input values
-    hfreqIntpEnv = interp1d(hfreqIntp[0::2], hfreqIntp[1::2], fill_value=0)  # interpolation function
-    hfreqIndexes = hfreqIntpEnv(np.arange(L1))  # generate frame indexes for the output
-    hmagIntpEnv = interp1d(hmagIntp[0::2], hmagIntp[1::2], fill_value=0)  # interpolation function
-    hmagIndexes = hmagIntpEnv(np.arange(L1))  # generate frame indexes for the output
-    stocIntpEnv = interp1d(stocIntp[0::2], stocIntp[1::2], fill_value=0)  # interpolation function
-    stocIndexes = stocIntpEnv(np.arange(L1))  # generate frame indexes for the output
-    yhfreq = np.zeros_like(hfreq1)  # create empty output matrix
-    yhmag = np.zeros_like(hmag1)  # create empty output matrix
-    ystocEnv = np.zeros_like(stocEnv1)  # create empty output matrix
 
-    for l in range(L1):  # generate morphed frames
+    intps = (hfreqIntp, hmagIntp, stocIntp)
+    # normalize input values
+    for intp in intps:
+        intp[::2] = (L1 - 1) * intp[::2] / intp[-2]
+    l1_samples = np.arange(L1)
+    # generate frame indexes for the output via an interpolation function
+    hfreqIndexes, hmagIndexes, stocIndexes = [
+        interp1d(intp[0::2], intp[1::2], fill_value=0)(l1_samples)
+        for intp in intps]
+    # create empty output matrices
+    yhfreq, yhmag, ystocEnv = [np.zeros_like(src) for src in (hfreq1, hmag1, stocEnv1)]
+
+    def interpolate(x, y, a):
+        return (1 - a) * x + a * y
+
+    def find_first_nonzero(values):
+        return np.array(np.nonzero(values), dtype=np.int)[0]
+
+    # generate morphed frames
+    # l1, l2 - frame indexes of source models
+    for l1 in range(L1):
+        l2 = round(L2 * l1 / float(L1))
         # identify harmonics that are present in both frames
-        harmonics = np.intersect1d(np.array(np.nonzero(hfreq1[l, :]), dtype=np.int)[0],
-                                   np.array(np.nonzero(hfreq2[round(L2 * l / float(L1)), :]), dtype=np.int)[0])
-        # interpolate the frequencies of the existing harmonics
-        yhfreq[l, harmonics] = (1 - hfreqIndexes[l]) * hfreq1[l, harmonics] + hfreqIndexes[l] * hfreq2[
-            round(L2 * l / float(L1)), harmonics]
-        # interpolate the magnitudes of the existing harmonics
-        yhmag[l, harmonics] = (1 - hmagIndexes[l]) * hmag1[l, harmonics] + hmagIndexes[l] * hmag2[
-            round(L2 * l / float(L1)), harmonics]
-        # interpolate the stochastic envelopes of both frames
-        ystocEnv[l, :] = (1 - stocIndexes[l]) * stocEnv1[l, :] + stocIndexes[l] * stocEnv2[round(L2 * l / float(L1)), :]
+        harmonics = np.intersect1d(
+            find_first_nonzero(hfreq1[l1, :]),
+            find_first_nonzero(hfreq2[l2, :]))
+        # interpolate the components of both frames
+        yhfreq[l1, harmonics] = interpolate(hfreq1[l1, harmonics], hfreq2[l2, harmonics], hfreqIndexes[l1])
+        yhmag[l1, harmonics] = interpolate(hmag1[l1, harmonics], hmag2[l2, harmonics], hmagIndexes[l1])
+        ystocEnv[l1, :] = interpolate(stocEnv1[l1, :], stocEnv2[l2, :], stocIndexes[l1])
     return yhfreq, yhmag, ystocEnv

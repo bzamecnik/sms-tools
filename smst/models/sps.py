@@ -32,8 +32,10 @@ def from_audio(x, fs, w, N, H, t, minSineDur, maxnSines, freqDevOffset, freqDevS
     # perform sinusoidal analysis
     tfreq, tmag, tphase = sine.from_audio(x, fs, w, N, H, t, maxnSines, minSineDur, freqDevOffset, freqDevSlope)
     Ns = 512
-    xr = residual.subtract_sinusoids(x, Ns, H, tfreq, tmag, tphase, fs)  # subtract sinusoids from original sound
-    stocEnv = stochastic.from_audio(xr, H, H * 2, stocf)  # compute stochastic model of residual
+    # subtract sinusoids from original sound
+    xr = residual.subtract_sinusoids(x, Ns, H, tfreq, tmag, tphase, fs)
+    # compute stochastic model of residual
+    stocEnv = stochastic.from_audio(xr, H, H * 2, stocf)
     return tfreq, tmag, tphase, stocEnv
 
 
@@ -54,7 +56,11 @@ def to_audio(tfreq, tmag, tphase, stocEnv, N, H, fs):
       - yst: stochastic component
     """
 
-    ys = sine.to_audio(tfreq, tmag, tphase, N, H, fs)  # synthesize sinusoids
-    yst = stochastic.to_audio(stocEnv, H, H * 2)  # synthesize stochastic residual
-    y = ys[:min(ys.size, yst.size)] + yst[:min(ys.size, yst.size)]  # sum sinusoids and stochastic components
+    # synthesize sinusoids
+    ys = sine.to_audio(tfreq, tmag, tphase, N, H, fs)
+    # synthesize stochastic residual
+    yst = stochastic.to_audio(stocEnv, H, H * 2)
+    # sum sinusoids and stochastic components
+    end = min(ys.size, yst.size)
+    y = ys[:end] + yst[:end]
     return y, ys, yst

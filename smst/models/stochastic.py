@@ -44,15 +44,14 @@ def from_audio(x, H, N, stocf):
     w = hanning(N)  # analysis window
     x = np.append(np.zeros(No2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(No2))  # add zeros at the end to analyze last sample
+    stocEnv = []
     for frame_index, x1 in enumerate(stft.iterate_analysis_frames(x, H, No2, No2)):
         xw = x1 * w  # window the input sound
         X = fft(xw)  # compute FFT
         mX = 20 * np.log10(abs(X[:hN]))  # magnitude spectrum of positive frequencies
         mY = resample(np.maximum(-200, mX), stocf * hN)  # decimate the mag spectrum
-        if frame_index == 0:  # first frame
-            stocEnv = np.array([mY])
-        else:  # rest of frames
-            stocEnv = np.vstack((stocEnv, np.array([mY])))
+        stocEnv.append(mY)
+    stocEnv = np.vstack(stocEnv)
     return stocEnv
 
 
@@ -107,7 +106,8 @@ def scale_time(stocEnv, timeScaling):
     # create interpolation object with the time scaling values
     timeScalingEnv = interp1d(timeScaling[::2] / timeScaling[-2], timeScaling[1::2] / timeScaling[-1])
     indexes = (L - 1) * timeScalingEnv(np.arange(outL) / float(outL))  # generate output time indexes
-    ystocEnv = stocEnv[0, :]  # first output frame is same than input
+    ystocEnv = [stocEnv[0, :]]  # first output frame is same than input
     for l in indexes[1:]:  # step through the output frames
-        ystocEnv = np.vstack((ystocEnv, stocEnv[round(l), :]))  # get the closest input frame
+        ystocEnv.append(stocEnv[round(l), :])  # get the closest input frame
+    ystocEnv = np.vstack(ystocEnv)
     return ystocEnv
