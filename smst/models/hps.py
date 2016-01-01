@@ -1,5 +1,9 @@
 """
-Functions that implement analysis and synthesis of sounds using the Harmonic plus Stochastic Model.
+Functions that implement analysis and synthesis of sounds using the Harmonic
+plus Stochastic Model.
+
+In this model the signal is first modeled using the harmonic model. Then the
+residual is modeled using the stochastic model.
 """
 
 import numpy as np

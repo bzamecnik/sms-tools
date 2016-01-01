@@ -1,5 +1,10 @@
 """
-Functions that implement analysis and synthesis of sounds using the Stochastic Model.
+Functions that implement analysis and synthesis of sounds using the Stochastic
+Model.
+
+In this model the sound is modeled using a magnitude envelope of the signal's
+spectrum. The magnitude envelope is decimated. On reconstruction the phases
+are generated randomly.
 """
 
 import numpy as np

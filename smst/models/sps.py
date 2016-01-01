@@ -1,5 +1,9 @@
 """
-Functions that implement analysis and synthesis of sounds using the Sinusoidal plus Stochastic Model.
+Functions that implement analysis and synthesis of sounds using the Sinusoidal
+plus Stochastic Model.
+
+In this model the signal is first modeled using the sinusoidal model. Then the
+residual is modeled using the stochastic model.
 """
 
 from . import sine, stochastic
