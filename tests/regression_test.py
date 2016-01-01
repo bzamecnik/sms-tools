@@ -60,6 +60,7 @@ from smst.ui.models import (
 from smst.ui.transformations import (
     harmonicTransformations_function,
     hpsMorph_function,
+    hpsTransformations_function,
     sineTransformations_function,
     stftMorph_function,
     stochasticTransformations_function
@@ -77,6 +78,7 @@ modules = {
     'stochasticModel_function': stochasticModel_function,
     'harmonicTransformations_function': harmonicTransformations_function,
     'hpsMorph_function': hpsMorph_function,
+    'hpsTransformations_function': hpsTransformations_function,
     'sineTransformations_function': sineTransformations_function,
     'stftMorph_function': stftMorph_function,
     'stochasticTransformations_function': stochasticTransformations_function
