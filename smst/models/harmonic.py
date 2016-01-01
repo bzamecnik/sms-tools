@@ -2,15 +2,11 @@
 Functions that implement analysis and synthesis of sounds using the Harmonic Model.
 """
 
-import math
-
 import numpy as np
 from scipy.interpolate import interp1d
-from scipy.signal import blackmanharris, triang
-from scipy.fftpack import ifft
 
 from . import dft, sine, stft
-from ..utils import peaks, synth
+from ..utils import peaks
 
 
 def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, minSineDur=.02):

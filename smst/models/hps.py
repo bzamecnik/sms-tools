@@ -4,12 +4,9 @@ Functions that implement analysis and synthesis of sounds using the Harmonic plu
 
 import numpy as np
 from scipy.interpolate import interp1d
-from scipy.signal import resample, blackmanharris, triang, hanning
 
-from scipy.fftpack import fft, ifft
-
-from . import dft, harmonic, sine, stochastic
-from ..utils import peaks, residual, synth
+from . import harmonic, sine, stochastic
+from ..utils import residual
 
 
 def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope, minSineDur, Ns, stocf):
