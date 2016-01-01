@@ -1,5 +1,6 @@
-# functions that implement analysis and synthesis of sounds using the Harmonic Model
-# (for example usage check the models_interface directory)
+"""
+Functions that implement analysis and synthesis of sounds using the Harmonic Model.
+"""
 
 import math
 
@@ -14,12 +15,20 @@ from ..utils import peaks, synth
 
 def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, minSineDur=.02):
     """
-    Analysis of a sound using the sinusoidal harmonic model
-    x: input sound; fs: sampling rate, w: analysis window; N: FFT size (minimum 512); t: threshold in negative dB,
-    nH: maximum number of harmonics;  minf0: minimum f0 frequency in Hz,
-    maxf0: maximim f0 frequency in Hz; f0et: error threshold in the f0 detection (ex: 5),
-    harmDevSlope: slope of harmonic deviation; minSineDur: minimum length of harmonics
-    returns xhfreq, xhmag, xhphase: harmonic frequencies, magnitudes and phases
+    Analyzes a sound using the sinusoidal harmonic model.
+
+    :param x: input sound
+    :param fs: sampling rate
+    :param w: analysis window
+    :param N: FFT size (minimum 512)
+    :param t: threshold in negative dB
+    :param nH: maximum number of harmonics
+    :param minf0: minimum f0 frequency in Hz
+    :param maxf0: maximim f0 frequency in Hz
+    :param f0et: error threshold in the f0 detection (ex: 5)
+    :param harmDevSlope: slope of harmonic deviation
+    :param minSineDur: minimum length of harmonics
+    :returns: xhfreq, xhmag, xhphase: harmonic frequencies, magnitudes and phases
     """
 
     if minSineDur < 0:  # raise exception if minSineDur is smaller than 0
@@ -58,13 +67,15 @@ def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, min
 
 def scale_frequencies(hfreq, hmag, freqScaling, freqStretching, timbrePreservation, fs):
     """
-    Frequency scaling of the harmonics of a sound
-    hfreq, hmag: frequencies and magnitudes of input harmonics
-    freqScaling: scaling factors, in time-value pairs (value of 1 no scaling)
-    freqStretching: stretching factors, in time-value pairs (value of 1 no stretching)
-    timbrePreservation: 0  no timbre preservation, 1 timbre preservation
-    fs: sampling rate of input sound
-    returns yhfreq, yhmag: frequencies and magnitudes of output harmonics
+    Scales the frequencies of the harmonics of a sound.
+
+    :param hfreq: frequencies of input harmonics
+    :param hmag: magnitudes of input harmonics
+    :param freqScaling: scaling factors, in time-value pairs (value of 1 no scaling)
+    :param freqStretching: stretching factors, in time-value pairs (value of 1 no stretching)
+    :param timbrePreservation: 0  no timbre preservation, 1 timbre preservation
+    :param fs: sampling rate of input sound
+    :returns: yhfreq, yhmag: frequencies and magnitudes of output harmonics
     """
     if freqScaling.size % 2 != 0:  # raise exception if array not even length
         raise ValueError("Frequency scaling array does not have an even size")
@@ -101,12 +112,17 @@ def scale_frequencies(hfreq, hmag, freqScaling, freqStretching, timbrePreservati
 
 def find_fundamental_freq(x, fs, w, N, H, t, minf0, maxf0, f0et):
     """
-    Fundamental frequency detection of a sound using twm algorithm
-    x: input sound; fs: sampling rate; w: analysis window;
-    N: FFT size; t: threshold in negative dB,
-    minf0: minimum f0 frequency in Hz, maxf0: maximim f0 frequency in Hz,
-    f0et: error threshold in the f0 detection (ex: 5),
-    returns f0: fundamental frequency
+    Finds fundamental frequencies of a sound using the TWM (Two-Way Mismatch) algorithm.
+
+    :param x: input sound
+    :param fs: sampling rate
+    :param w: analysis window
+    :param N: FFT size
+    :param t: threshold in negative dB
+    :param minf0: minimum f0 frequency in Hz
+    :param maxf0: maximim f0 frequency in Hz
+    :param f0et: error threshold in the f0 detection (ex: 5)
+    :returns: f0: fundamental frequency
     """
     if minf0 < 0:  # raise exception if minf0 is smaller than 0
         raise ValueError("Minumum fundamental frequency (minf0) smaller than 0")
@@ -141,13 +157,18 @@ def find_fundamental_freq(x, fs, w, N, H, t, minf0, maxf0, f0et):
 
 def find_harmonics(pfreq, pmag, pphase, f0, nH, hfreqp, fs, harmDevSlope=0.01):
     """
-    Detection of the harmonics of a frame from a set of spectral peaks using f0
-    to the ideal harmonic series built on top of a fundamental frequency
-    pfreq, pmag, pphase: peak frequencies, magnitudes and phases
-    f0: fundamental frequency, nH: number of harmonics,
-    hfreqp: harmonic frequencies of previous frame,
-    fs: sampling rate; harmDevSlope: slope of change of the deviation allowed to perfect harmonic
-    returns hfreq, hmag, hphase: harmonic frequencies, magnitudes, phases
+    Finds harmonics of a frame from a set of spectral peaks using f0
+    to the ideal harmonic series built on top of a fundamental frequency.
+
+    :param pfreq: peak frequencies
+    :param pmag: peak magnitudes
+    :param pphase: peak phases
+    :param f0: fundamental frequency
+    :param nH: number of harmonics
+    :param hfreqp: harmonic frequencies of previous frame
+    :param fs: sampling rate
+    :param harmDevSlope: slope of change of the deviation allowed to perfect harmonic
+    :returns: hfreq, hmag, hphase: harmonic frequencies, magnitudes, phases
     """
 
     if f0 <= 0:  # if no f0 return no harmonics

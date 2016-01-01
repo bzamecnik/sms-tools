@@ -25,9 +25,12 @@ norm_fact = {'int16': INT16_FAC, 'int32': INT32_FAC, 'int64': INT64_FAC, 'float3
 
 def read_wav(filename):
     """
-    Read a sound file and convert it to a normalized floating point array
-    filename: name of file to read
-    returns fs: sampling rate of file, x: floating point array
+    Reads a sound file and converts it to a normalized floating point array.
+
+    :param filename: name of file to read
+    :returns:
+      - fs: sampling rate of file
+      - x: floating point array
     """
 
     if not os.path.isfile(filename):  # raise error if wrong input file
@@ -48,8 +51,9 @@ def read_wav(filename):
 
 def play_wav(filename):
     """
-    Play a wav audio file from system using OS calls
-    filename: name of file to read
+    Plays a wav audio file from system using OS calls.
+
+    :param filename: name of file to read
     """
     if not os.path.isfile(filename):  # raise error if wrong input file
         print("Input file does not exist. Make sure you computed the analysis/synthesis")
@@ -72,10 +76,12 @@ def play_wav(filename):
 
 def write_wav(y, fs, filename):
     """
-    Write a sound file from an array with the sound and the sampling rate.
+    Writes a sound file from an array with the sound and the sampling rate.
     Creates the directory for the file if it does not exist.
-    y: floating point array of one dimension, fs: sampling rate
-    filename: name of file to create (can be a path)
+
+    :param y: floating point array of one dimension
+    :param fs: sampling rate
+    :param filename: name of file to create (can be a path)
     """
 
     dir = os.path.dirname(filename)

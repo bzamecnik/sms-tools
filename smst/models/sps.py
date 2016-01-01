@@ -1,5 +1,6 @@
-# functions that implement analysis and synthesis of sounds using the Sinusoidal plus Stochastic Model
-# (for example usage check the models_interface directory)
+"""
+Functions that implement analysis and synthesis of sounds using the Sinusoidal plus Stochastic Model.
+"""
 
 import math
 
@@ -13,14 +14,21 @@ from ..utils import peaks, residual, synth
 
 def from_audio(x, fs, w, N, H, t, minSineDur, maxnSines, freqDevOffset, freqDevSlope, stocf):
     """
-    Analysis of a sound using the sinusoidal plus stochastic model
-    x: input sound, fs: sampling rate, w: analysis window; N: FFT size, t: threshold in negative dB,
-    minSineDur: minimum duration of sinusoidal tracks
-    maxnSines: maximum number of parallel sinusoids
-    freqDevOffset: frequency deviation allowed in the sinusoids from frame to frame at frequency 0
-    freqDevSlope: slope of the frequency deviation, higher frequencies have bigger deviation
-    stocf: decimation factor used for the stochastic approximation
-    returns hfreq, hmag, hphase: harmonic frequencies, magnitude and phases; stocEnv: stochastic residual
+    Analyzes a sound using the sinusoidal plus stochastic model.
+
+    :param x: input sound
+    :param fs: sampling rate
+    :param w: analysis window
+    :param N: FFT size
+    :param t: threshold in negative dB
+    :param minSineDur: minimum duration of sinusoidal tracks
+    :param maxnSines: maximum number of parallel sinusoids
+    :param freqDevOffset: frequency deviation allowed in the sinusoids from frame to frame at frequency 0
+    :param freqDevSlope: slope of the frequency deviation, higher frequencies have bigger deviation
+    :param stocf: decimation factor used for the stochastic approximation
+    :returns:
+      - hfreq, hmag, hphase: harmonic frequencies, magnitude and phases
+      - stocEnv: stochastic residual
     """
 
     # perform sinusoidal analysis
@@ -33,10 +41,19 @@ def from_audio(x, fs, w, N, H, t, minSineDur, maxnSines, freqDevOffset, freqDevS
 
 def to_audio(tfreq, tmag, tphase, stocEnv, N, H, fs):
     """
-    Synthesis of a sound using the sinusoidal plus stochastic model
-    tfreq, tmag, tphase: sinusoidal frequencies, amplitudes and phases; stocEnv: stochastic envelope
-    N: synthesis FFT size; H: hop size, fs: sampling rate
-    returns y: output sound, ys: sinusoidal component, yst: stochastic component
+    Synthesizes a sound using the sinusoidal plus stochastic model.
+
+    :param tfreq: sinusoidal frequencies
+    :param tmag: sinusoidal amplitudes
+    :param tphase: sinusoidal phases
+    :param stocEnv: stochastic envelope
+    :param N: synthesis FFT size
+    :param H: hop size
+    :param fs: sampling rate
+    :returns:
+      - y: output sound
+      - ys: sinusoidal component
+      - yst: stochastic component
     """
 
     ys = sine.to_audio(tfreq, tmag, tphase, N, H, fs)  # synthesize sinusoids

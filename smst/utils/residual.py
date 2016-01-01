@@ -7,10 +7,15 @@ from .utilFunctions_C import utilFunctions_C as UF_C
 
 def subtract_sinusoids(x, N, H, sfreq, smag, sphase, fs):
     """
-    Subtract sinusoids from a sound
-    x: input sound, N: fft-size, H: hop-size
-    sfreq, smag, sphase: sinusoidal frequencies, magnitudes and phases
-    returns xr: residual sound
+    Subtracts sinusoids from a sound.
+
+    :param x: input sound
+    :param N: FFT size
+    :param H: hop size
+    :param sfreq: sinusoidal frequencies
+    :param smag: sinusoidal magnitudes
+    :param sphase: sinusoidal phases
+    :returns: xr: residual sound
     """
 
     hN = N / 2  # half of fft size
@@ -39,11 +44,17 @@ def subtract_sinusoids(x, N, H, sfreq, smag, sphase, fs):
 # TODO: unused code
 def subtract_sinusoids_with_stochastic_residual(x, N, H, sfreq, smag, sphase, fs, stocf):
     """
-    Subtract sinusoids from a sound and approximate the residual with an envelope
-    x: input sound, N: fft size, H: hop-size
-    sfreq, smag, sphase: sinusoidal frequencies, magnitudes and phases
-    fs: sampling rate; stocf: stochastic factor, used in the approximation
-    returns stocEnv: stochastic approximation of residual
+    Subtracts sinusoids from a sound and approximate the residual with an envelope.
+
+    :param x: input sound
+    :param N: FFT size
+    :param H: hop size
+    :param sfreq: sinusoidal frequencies
+    :param smag: sinusoidal magnitudes
+    :param sphase: sinusoidal phases
+    :param fs: sampling rate
+    :param stocf: stochastic factor, used in the approximation
+    :returns: stocEnv: stochastic approximation of residual
     """
 
     hN = N / 2  # half of fft size

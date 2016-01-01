@@ -1,7 +1,6 @@
-# functions that implement analysis and synthesis of sounds using the Sinusoidal Model
-# (for example usage check the examples models_interface)
-
-import math
+"""
+Functions that implement analysis and synthesis of sounds using the Sinusoidal Model.
+"""
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -14,11 +13,18 @@ from ..utils import peaks, synth
 
 def from_audio(x, fs, w, N, H, t, maxnSines=100, minSineDur=.01, freqDevOffset=20, freqDevSlope=0.01):
     """
-    Analysis of a sound using the sinusoidal model with sine tracking
-    x: input array sound, w: analysis window, N: size of complex spectrum, H: hop-size, t: threshold in negative dB
-    maxnSines: maximum number of sines per frame, minSineDur: minimum duration of sines in seconds
-    freqDevOffset: minimum frequency deviation at 0Hz, freqDevSlope: slope increase of minimum frequency deviation
-    returns xtfreq, xtmag, xtphase: frequencies, magnitudes and phases of sinusoidal tracks
+    Analyzes a sound using the sinusoidal model with sine tracking.
+
+    :param x: input array sound
+    :param w: analysis window
+    :param N: size of complex spectrum
+    :param H: hop-size
+    :param t: threshold in negative dB
+    :param maxnSines: maximum number of sines per frame
+    :param minSineDur: minimum duration of sines in seconds
+    :param freqDevOffset: minimum frequency deviation at 0Hz
+    :param freqDevSlope: slope increase of minimum frequency deviation
+    :returns: xtfreq, xtmag, xtphase: frequencies, magnitudes and phases of sinusoidal tracks
     """
 
     if (minSineDur < 0):  # raise error if minSineDur is smaller than 0
@@ -59,10 +65,15 @@ def from_audio(x, fs, w, N, H, t, maxnSines=100, minSineDur=.01, freqDevOffset=2
 
 def to_audio(tfreq, tmag, tphase, N, H, fs):
     """
-    Synthesis of a sound using the sinusoidal model
-    tfreq,tmag,tphase: frequencies, magnitudes and phases of sinusoids
-    N: synthesis FFT size, H: hop size, fs: sampling rate
-    returns y: output array sound
+    Synthesizes a sound using the sinusoidal model.
+
+    :param tfreq: frequencies of sinusoids
+    :param tmag: magnitudes of sinusoids
+    :param tphase: phases of sinusoids
+    :param N: synthesis FFT size
+    :param H: hop size
+    :param fs: sampling rate
+    :returns: y: output array sound
     """
 
     hN = N / 2  # half of FFT size for synthesis
@@ -97,10 +108,12 @@ def to_audio(tfreq, tmag, tphase, N, H, fs):
 
 def scale_time(sfreq, smag, timeScaling):
     """
-    Time scaling of sinusoidal tracks
-    sfreq, smag: frequencies and magnitudes of input sinusoidal tracks
-    timeScaling: scaling factors, in time-value pairs
-    returns ysfreq, ysmag: frequencies and magnitudes of output sinusoidal tracks
+    Scales sinusoidal tracks in time.
+
+    :param sfreq: frequencies of input sinusoidal tracks
+    :param smag: magnitudes of input sinusoidal tracks
+    :param timeScaling: scaling factors, in time-value pairs
+    :returns: ysfreq, ysmag: frequencies and magnitudes of output sinusoidal tracks
     """
     if timeScaling.size % 2 != 0:  # raise exception if array not even length
         raise ValueError("Time scaling array does not have an even size")
@@ -123,10 +136,11 @@ def scale_time(sfreq, smag, timeScaling):
 
 def scale_frequencies(sfreq, freqScaling):
     """
-    Frequency scaling of sinusoidal tracks
-    sfreq: frequencies of input sinusoidal tracks
-    freqScaling: scaling factors, in time-value pairs (value of 1 is no scaling)
-    returns ysfreq: frequencies of output sinusoidal tracks
+    Scales sinusoidal tracks in frequency.
+
+    :param sfreq: frequencies of input sinusoidal tracks
+    :param freqScaling: scaling factors, in time-value pairs (value of 1 is no scaling)
+    :returns: ysfreq: frequencies of output sinusoidal tracks
     """
     if (freqScaling.size % 2 != 0):  # raise exception if array not even length
         raise ValueError("Frequency scaling array does not have an even size")
@@ -147,12 +161,15 @@ def scale_frequencies(sfreq, freqScaling):
 
 def track_sinusoids(pfreq, pmag, pphase, tfreq, freqDevOffset=20, freqDevSlope=0.01):
     """
-    Tracking sinusoids from one frame to the next
-    pfreq, pmag, pphase: frequencies and magnitude of current frame
-    tfreq: frequencies of incoming tracks from previous frame
-    freqDevOffset: minimum frequency deviation at 0Hz
-    freqDevSlope: slope increase of minimum frequency deviation
-    returns tfreqn, tmagn, tphasen: frequency, magnitude and phase of tracks
+    Tracks sinusoids from one frame to the next.
+
+    :param pfreq: frequencies of current frame
+    :param pmag: magnitude of current frame
+    :param pphase: phases of current frame
+    :param tfreq: frequencies of incoming tracks from previous frame
+    :param freqDevOffset: minimum frequency deviation at 0Hz
+    :param freqDevSlope: slope increase of minimum frequency deviation
+    :returns: tfreqn, tmagn, tphasen: frequency, magnitude and phase of tracks
     """
 
     tfreqn = np.zeros(tfreq.size)  # initialize array for output frequencies
@@ -205,10 +222,11 @@ def track_sinusoids(pfreq, pmag, pphase, tfreq, freqDevOffset=20, freqDevSlope=0
 
 def clean_sinusoid_tracks(tfreq, minTrackLength=3):
     """
-    Delete short fragments of a collection of sinusoidal tracks
-    tfreq: frequency of tracks
-    minTrackLength: minimum duration of tracks in number of frames
-    returns tfreqn: output frequency of tracks
+    Deletes short fragments of a collection of sinusoidal tracks.
+
+    :param tfreq: frequency of tracks
+    :param minTrackLength: minimum duration of tracks in number of frames
+    :returns: tfreqn: output frequency of tracks
     """
 
     # number of frames, number of tracks in a frame

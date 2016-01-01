@@ -1,5 +1,6 @@
-# functions that implement analysis and synthesis of sounds using the Stochastic Model
-# (for example usage check stochasticModel_function.py in the models_interface directory)
+"""
+Functions that implement analysis and synthesis of sounds using the Stochastic Model.
+"""
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -12,10 +13,13 @@ from ..utils.math import is_power_of_two
 
 def from_audio(x, H, N, stocf):
     """
-    Stochastic analysis of a sound
-    x: input array sound, H: hop size, N: fftsize
-    stocf: decimation factor of mag spectrum for stochastic analysis, bigger than 0, maximum of 1
-    returns stocEnv: stochastic envelope
+    Analyzes a sound using the stochastic model.
+
+    :param x: input array sound
+    :param H: hop size
+    :param N: FFT size
+    :param stocf: decimation factor of mag spectrum for stochastic analysis, bigger than 0, maximum of 1
+    :returns: stocEnv: stochastic envelope
     """
 
     hN = N / 2 + 1  # positive size of fft
@@ -49,9 +53,12 @@ def from_audio(x, H, N, stocf):
 
 def to_audio(stocEnv, H, N):
     """
-    Stochastic synthesis of a sound
-    stocEnv: stochastic envelope; H: hop size; N: fft size
-    returns y: output sound
+    Synthesizes sound from a stochastic model.
+
+    :param stocEnv: stochastic envelope
+    :param H: hop size
+    :param N: fft size
+    :returns: y: output sound
     """
 
     if not (is_power_of_two(N)):  # raise error if N not a power of two
@@ -77,14 +84,15 @@ def to_audio(stocEnv, H, N):
     y = np.delete(y, range(y.size - No2, y.size))  # delete half of the last window
     return y
 
-# functions that implement transformations using the hpsModel
+# functions that implement transformations using the stochastic
 
 def scale_time(stocEnv, timeScaling):
     """
-    Time scaling of the stochastic representation of a sound
-    stocEnv: stochastic envelope
-    timeScaling: scaling factors, in time-value pairs
-    returns ystocEnv: stochastic envelope
+    Scales the stochastic model of a sound in time.
+
+    :param stocEnv: stochastic envelope
+    :param timeScaling: scaling factors, in time-value pairs
+    :returns: ystocEnv: stochastic envelope
     """
     if timeScaling.size % 2 != 0:  # raise exception if array not even length
         raise ValueError("Time scaling array does not have an even size")
