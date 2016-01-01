@@ -86,8 +86,8 @@ def filter(x, fs, w, N, H, filter):
     y = np.zeros(x.size)  # initialize output array
     while pin < pend:  # while sound pointer is smaller than last sample
         # -----analysis-----
-        x1 = x[pin - hM1:pin + hM2]  # select one frame of input sound
-        mX, pX = dft.from_audio(x1, w, N)  # compute DFT
+        x_frame = x[pin - hM1:pin + hM2]  # select one frame of input sound
+        mX, pX = dft.from_audio(x_frame, w, N)  # compute DFT
         # ------transformation-----
         mY = mX + filter  # filter input magnitude spectrum
         # -----synthesis-----

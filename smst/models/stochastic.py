@@ -45,8 +45,8 @@ def from_audio(x, H, N, stocf):
     x = np.append(np.zeros(No2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(No2))  # add zeros at the end to analyze last sample
     stocEnv = []
-    for x1 in stft.iterate_analysis_frames(x, H, No2, No2):
-        xw = x1 * w  # window the input sound
+    for x_frame in stft.iterate_analysis_frames(x, H, No2, No2):
+        xw = x_frame * w  # window the input sound
         X = fft(xw)  # compute FFT
         mX = to_db_magnitudes(X[:hN])  # magnitude spectrum of positive frequencies
         mY = resample(np.maximum(-200, mX), stocf * hN)  # decimate the mag spectrum

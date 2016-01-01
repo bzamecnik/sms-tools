@@ -46,8 +46,8 @@ def from_audio(x, fs, w, N, H, t, maxnSines=100, minSineDur=.01, freqDevOffset=2
     tfreq = np.array([])
     # xtfreq, xtmag, xtphase
     xt = ([], [], [])
-    for x1 in stft.iterate_analysis_frames(x_padded, H, hM1, hM2):
-        mX, pX = dft.from_audio(x1, w, N)  # compute dft
+    for x_frame in stft.iterate_analysis_frames(x_padded, H, hM1, hM2):
+        mX, pX = dft.from_audio(x_frame, w, N)  # compute dft
         ploc = peaks.find_peaks(mX, t)  # detect locations of peaks
         iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values by interpolation
         ipfreq = fs * iploc / float(N)  # convert peak locations to Hertz

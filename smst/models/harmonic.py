@@ -148,8 +148,8 @@ def find_fundamental_freq(x, fs, w, N, H, t, minf0, maxf0, f0et):
     w = w / sum(w)  # normalize analysis window
     f0 = []  # initialize f0 output
     f0stable = 0  # initialize f0 stable
-    for x1 in stft.iterate_analysis_frames(x, H, hM1, hM2):
-        mX, pX = dft.from_audio(x1, w, N)  # compute dft
+    for x_frame in stft.iterate_analysis_frames(x, H, hM1, hM2):
+        mX, pX = dft.from_audio(x_frame, w, N)  # compute dft
         ploc = peaks.find_peaks(mX, t)  # detect peak locations
         iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values
         ipfreq = fs * iploc / N  # convert locations to Hez
