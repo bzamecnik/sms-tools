@@ -9,6 +9,7 @@ from scipy.signal import get_window
 from smst.utils import audio, files
 from smst.models import sine
 from .. import demo_sound_path
+from smst.utils.files import strip_file
 
 
 def analysis(inputFile=demo_sound_path('mridangam.wav'), window='hamming', M=801, N=2048, t=-90,
@@ -46,7 +47,7 @@ def analysis(inputFile=demo_sound_path('mridangam.wav'), window='hamming', M=801
     y = sine.to_audio(tfreq, tmag, np.array([]), Ns, H, fs)
 
     # output sound file (monophonic with sampling rate of 44100)
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_sineModel.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_sineModel.wav'
 
     # write the sound resulting from the inverse stft
     audio.write_wav(y, fs, outputFile)
@@ -122,7 +123,7 @@ def transformation_synthesis(inputFile, fs, tfreq, tmag, freqScaling=np.array([0
     y = sine.to_audio(ytfreq, ytmag, np.array([]), Ns, H, fs)
 
     # write output sound
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_sineModelTransformation.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_sineModelTransformation.wav'
     audio.write_wav(y, fs, outputFile)
 
     # create figure to plot

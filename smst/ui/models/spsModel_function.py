@@ -9,6 +9,7 @@ from scipy.signal import get_window
 from smst.utils import audio, files
 from smst.models import sps
 from .. import demo_sound_path
+from smst.utils.files import strip_file
 
 
 def main(inputFile=demo_sound_path('bendir.wav'), window='hamming', M=2001, N=2048, t=-80, minSineDur=0.02,
@@ -45,9 +46,11 @@ def main(inputFile=demo_sound_path('bendir.wav'), window='hamming', M=2001, N=20
     y, ys, yst = sps.to_audio(tfreq, tmag, tphase, stocEnv, Ns, H, fs)
 
     # output sound file (monophonic with sampling rate of 44100)
-    outputFileSines = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_spsModel_sines.wav'
-    outputFileStochastic = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_spsModel_stochastic.wav'
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_spsModel.wav'
+    baseFileName = strip_file(inputFile)
+    outputFileSines, outputFileStochastic, outputFile = [
+        'output_sounds/%s_spsModel%s.wav' % (baseFileName, i)
+        for i in ('_sines', '_stochastic', '')
+    ]
 
     # write sounds files for sinusoidal, residual, and the sum
     audio.write_wav(ys, fs, outputFileSines)

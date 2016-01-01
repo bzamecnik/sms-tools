@@ -9,6 +9,7 @@ import numpy as np
 
 from smst.utils import audio
 from . import stochasticTransformations_function as sT
+from smst.utils.files import strip_file
 
 
 class StochasticTransformationsFrame:
@@ -66,7 +67,7 @@ class StochasticTransformationsFrame:
 
         # BUTTON TO PLAY TRANSFORMATION SYNTHESIS OUTPUT
         self.transf_output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + os.path.basename(self.filelocation.get())[:-4] + '_stochasticModelTransformation.wav'),
+            'output_sounds/' + strip_file(self.filelocation.get()) + '_stochasticModelTransformation.wav'),
                                     bg="gray30", fg="white")
         self.transf_output.grid(row=13, column=0, padx=(165, 5), pady=(10, 15), sticky=W)
 

@@ -8,6 +8,7 @@ import numpy as np
 from smst.utils import audio, files
 from smst.models import stochastic
 from .. import demo_sound_path
+from smst.utils.files import strip_file
 
 
 def main(inputFile=demo_sound_path('rain.wav'), stocf=0.1, timeScaling=np.array([0, 0, 1, 2]),
@@ -35,7 +36,7 @@ def main(inputFile=demo_sound_path('rain.wav'), stocf=0.1, timeScaling=np.array(
     y = stochastic.to_audio(ystocEnv, H, H * 2)
 
     # write output sound
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_stochasticModelTransformation.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_stochasticModelTransformation.wav'
     audio.write_wav(y, fs, outputFile)
 
     # create figure to plot

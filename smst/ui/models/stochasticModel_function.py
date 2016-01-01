@@ -8,6 +8,7 @@ import numpy as np
 from smst.utils import audio, files
 from smst.models import stochastic
 from .. import demo_sound_path
+from smst.utils.files import strip_file
 
 
 def main(inputFile=demo_sound_path('ocean.wav'), H=256, N=512, stocf=.1,
@@ -27,7 +28,7 @@ def main(inputFile=demo_sound_path('ocean.wav'), H=256, N=512, stocf=.1,
     # synthesize sound from stochastic model
     y = stochastic.to_audio(stocEnv, H, N)
 
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_stochasticModel.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_stochasticModel.wav'
 
     # write output sound
     audio.write_wav(y, fs, outputFile)

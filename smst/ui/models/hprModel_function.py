@@ -47,9 +47,11 @@ def main(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman', M
     y, yh = hpr.to_audio(hfreq, hmag, hphase, xr, Ns, H, fs)
 
     # output sound file (monophonic with sampling rate of 44100)
-    outputFileSines = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_hprModel_sines.wav'
-    outputFileResidual = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_hprModel_residual.wav'
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_hprModel.wav'
+    baseFileName = files.strip_file(inputFile)
+    outputFileSines, outputFileResidual, outputFile = [
+        'output_sounds/%s_hprModel%s.wav' % (baseFileName, i)
+        for i in ('_sines', '_residual', '')
+    ]
 
     # write sounds files for harmonics, residual, and the sum
     audio.write_wav(yh, fs, outputFileSines)

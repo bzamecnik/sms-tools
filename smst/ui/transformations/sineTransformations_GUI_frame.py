@@ -9,6 +9,7 @@ import numpy as np
 
 from smst.utils import audio
 from . import sineTransformations_function as sT
+from smst.utils.files import strip_file
 
 
 class SineTransformationsFrame:
@@ -119,7 +120,7 @@ class SineTransformationsFrame:
 
         # BUTTON TO PLAY ANALYSIS/SYNTHESIS OUTPUT
         self.output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + os.path.basename(self.filelocation.get())[:-4] + '_sineModel.wav'), bg="gray30",
+            'output_sounds/' + strip_file(self.filelocation.get()) + '_sineModel.wav'), bg="gray30",
                              fg="white")
         self.output.grid(row=4, column=0, padx=(145, 5), pady=(10, 5), sticky=W)
 
@@ -153,7 +154,7 @@ class SineTransformationsFrame:
 
         # BUTTON TO PLAY TRANSFORMATION SYNTHESIS OUTPUT
         self.transf_output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + os.path.basename(self.filelocation.get())[:-4] + '_sineModelTransformation.wav'),
+            'output_sounds/' + strip_file(self.filelocation.get()) + '_sineModelTransformation.wav'),
                                     bg="gray30", fg="white")
         self.transf_output.grid(row=13, column=0, padx=(165, 5), pady=(10, 15), sticky=W)
 

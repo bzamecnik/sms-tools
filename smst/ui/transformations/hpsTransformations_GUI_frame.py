@@ -9,6 +9,7 @@ import numpy as np
 
 from smst.utils import audio
 from . import hpsTransformations_function as hT
+from smst.utils.files import strip_file
 
 
 class HpsTransformationsFrame:
@@ -146,7 +147,7 @@ class HpsTransformationsFrame:
 
         # BUTTON TO PLAY ANALYSIS/SYNTHESIS OUTPUT
         self.output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + os.path.basename(self.filelocation.get())[:-4] + '_hpsModel.wav'), bg="gray30",
+            'output_sounds/' + strip_file(self.filelocation.get()) + '_hpsModel.wav'), bg="gray30",
                              fg="white")
         self.output.grid(row=4, column=0, padx=(145, 5), pady=(10, 5), sticky=W)
 
@@ -198,7 +199,7 @@ class HpsTransformationsFrame:
 
         # BUTTON TO PLAY TRANSFORMATION SYNTHESIS OUTPUT
         self.transf_output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + os.path.basename(self.filelocation.get())[:-4] + '_hpsModelTransformation.wav'),
+            'output_sounds/' + strip_file(self.filelocation.get()) + '_hpsModelTransformation.wav'),
                                     bg="gray30", fg="white")
         self.transf_output.grid(row=13, column=0, padx=(165, 5), pady=(10, 15), sticky=W)
 

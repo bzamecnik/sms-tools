@@ -9,6 +9,7 @@ from scipy.signal import get_window
 from smst.utils import audio, files
 from smst.models import harmonic, hps
 from .. import demo_sound_path
+from smst.utils.files import strip_file
 
 
 def analysis(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman', M=601, N=1024, t=-100,
@@ -52,7 +53,7 @@ def analysis(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman
     y, yh, yst = hps.to_audio(hfreq, hmag, np.array([]), mYst, Ns, H, fs)
 
     # write output sound
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_hpsModel.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_hpsModel.wav'
     audio.write_wav(y, fs, outputFile)
 
     # create figure to plot
@@ -141,7 +142,7 @@ def transformation_synthesis(inputFile, fs, hfreq, hmag, mYst,
     y, yh, yst = hps.to_audio(yhfreq, yhmag, np.array([]), ystocEnv, Ns, H, fs)
 
     # write output sound
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_hpsModelTransformation.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_hpsModelTransformation.wav'
     audio.write_wav(y, fs, outputFile)
 
     # create figure to plot

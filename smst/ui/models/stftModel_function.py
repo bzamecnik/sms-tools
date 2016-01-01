@@ -9,6 +9,7 @@ from scipy.signal import get_window
 from smst.utils import audio, files
 from smst.models import stft
 from .. import demo_sound_path
+from smst.utils.files import strip_file
 
 
 def main(inputFile=demo_sound_path('piano.wav'), window='hamming', M=1024, N=1024, H=512,
@@ -35,7 +36,7 @@ def main(inputFile=demo_sound_path('piano.wav'), window='hamming', M=1024, N=102
     y = stft.to_audio(mX, pX, M, H)
 
     # output sound file (monophonic with sampling rate of 44100)
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_stft.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_stft.wav'
 
     # write the sound resulting from the inverse stft
     audio.write_wav(y, fs, outputFile)
