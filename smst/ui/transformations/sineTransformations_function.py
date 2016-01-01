@@ -71,7 +71,7 @@ def analysis(inputFile=demo_sound_path('mridangam.wav'), window='hamming', M=801
         tracks = np.copy(tfreq)
         tracks = tracks * np.less(tracks, maxplotfreq)
         tracks[tracks <= 0] = np.nan
-        numFrames = int(tracks[:, 0].size)
+        numFrames = int(tracks.shape[0])
         frmTime = H * np.arange(numFrames) / float(fs)
         plt.plot(frmTime, tracks)
         plt.axis([0, x.size / float(fs), 0, maxplotfreq])
@@ -137,7 +137,7 @@ def transformation_synthesis(inputFile, fs, tfreq, tmag, freqScaling=np.array([0
         tracks = np.copy(ytfreq)
         tracks = tracks * np.less(tracks, maxplotfreq)
         tracks[tracks <= 0] = np.nan
-        numFrames = int(tracks[:, 0].size)
+        numFrames = int(tracks.shape[0])
         frmTime = H * np.arange(numFrames) / float(fs)
         plt.plot(frmTime, tracks)
         plt.title('transformed sinusoidal tracks')

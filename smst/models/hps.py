@@ -58,7 +58,7 @@ def scale_time(hfreq, hmag, stocEnv, timeScaling):
     if timeScaling.size % 2 != 0:  # raise exception if array not even length
         raise ValueError("Time scaling array does not have an even size")
 
-    L = hfreq[:, 0].size  # number of input frames
+    L = hfreq.shape[0]  # number of input frames
     maxInTime = max(timeScaling[::2])  # maximum value used as input times
     maxOutTime = max(timeScaling[1::2])  # maximum value used in output times
     outL = int(L * maxOutTime / maxInTime)  # number of output frames
@@ -96,8 +96,8 @@ def morph(hfreq1, hmag1, stocEnv1, hfreq2, hmag2, stocEnv2, hfreqIntp, hmagIntp,
     if stocIntp.size % 2 != 0:  # raise exception if array not even length
         raise ValueError("Stochastic component array does not have an even size")
 
-    L1 = hfreq1[:, 0].size  # number of frames of sound 1
-    L2 = hfreq2[:, 0].size  # number of frames of sound 2
+    L1 = hfreq1.shape[0]  # number of frames of sound 1
+    L2 = hfreq2.shape[0]  # number of frames of sound 2
     hfreqIntp[::2] = (L1 - 1) * hfreqIntp[::2] / hfreqIntp[-2]  # normalize input values
     hmagIntp[::2] = (L1 - 1) * hmagIntp[::2] / hmagIntp[-2]  # normalize input values
     stocIntp[::2] = (L1 - 1) * stocIntp[::2] / stocIntp[-2]  # normalize input values

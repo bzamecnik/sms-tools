@@ -59,7 +59,7 @@ def to_audio(stocEnv, H, N):
 
     hN = N / 2 + 1  # positive size of fft
     No2 = N / 2  # half of N
-    L = stocEnv[:, 0].size  # number of frames
+    L = stocEnv.shape[0]  # number of frames
     ysize = H * (L + 3)  # output sound size
     y = np.zeros(ysize)  # initialize output array
     ws = 2 * hanning(N)  # synthesis window
@@ -89,7 +89,7 @@ def scale_time(stocEnv, timeScaling):
     if timeScaling.size % 2 != 0:  # raise exception if array not even length
         raise ValueError("Time scaling array does not have an even size")
 
-    L = stocEnv[:, 0].size  # number of input frames
+    L = stocEnv.shape[0]  # number of input frames
     outL = int(L * timeScaling[-1] / timeScaling[-2])  # number of synthesis frames
     # create interpolation object with the time scaling values
     timeScalingEnv = interp1d(timeScaling[::2] / timeScaling[-2], timeScaling[1::2] / timeScaling[-1])

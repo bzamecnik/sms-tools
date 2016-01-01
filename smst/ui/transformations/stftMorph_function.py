@@ -64,7 +64,7 @@ def main(inputFile1=demo_sound_path('ocean.wav'), inputFile2=demo_sound_path('sp
 
     # plot magnitude spectrogram of sound 1
     plt.subplot(4, 1, 2)
-    numFrames = int(mX1[:, 0].size)
+    numFrames = int(mX1.shape[0])
     frmTime = H1 * np.arange(numFrames) / float(fs)
     binFreq = fs * np.arange(N1 * maxplotfreq / fs) / N1
     plt.pcolormesh(frmTime, binFreq, np.transpose(mX1[:, :N1 * maxplotfreq / fs + 1]))
@@ -75,7 +75,7 @@ def main(inputFile1=demo_sound_path('ocean.wav'), inputFile2=demo_sound_path('sp
 
     # plot magnitude spectrogram of morphed sound
     plt.subplot(4, 1, 3)
-    numFrames = int(mY[:, 0].size)
+    numFrames = int(mY.shape[0])
     frmTime = H1 * np.arange(numFrames) / float(fs)
     binFreq = fs * np.arange(N1 * maxplotfreq / fs) / N1
     plt.pcolormesh(frmTime, binFreq, np.transpose(mY[:, :N1 * maxplotfreq / fs + 1]))

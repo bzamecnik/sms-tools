@@ -41,7 +41,7 @@ if __name__ == '__main__':
     w = hamming(2048)
     mX, pX = stft.from_audio(x, w, N, H)
     maxplotfreq = 2000.0
-    frmTime = H * np.arange(mX[:, 0].size) / float(fs)
+    frmTime = H * np.arange(mX.shape[0]) / float(fs)
     binFreq = fs * np.arange(N * maxplotfreq / fs) / N
     plt.pcolormesh(frmTime, binFreq, np.transpose(mX[:, :N * maxplotfreq / fs + 1]))
 

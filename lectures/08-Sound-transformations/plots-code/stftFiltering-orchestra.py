@@ -24,22 +24,22 @@ mY, pY = stft.from_audio(y, w, N, H)
 
 plt.figure(1, figsize=(12, 9))
 plt.subplot(311)
-numFrames = int(mX[:, 0].size)
+numFrames = int(mX.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
-binFreq = np.arange(mX[0, :].size) * float(fs) / N
+binFreq = np.arange(mX.shape[1]) * float(fs) / N
 plt.pcolormesh(frmTime, binFreq, np.transpose(mX))
 plt.title('mX (orchestra.wav)')
 plt.autoscale(tight=True)
 
 plt.subplot(312)
-plt.plot(fs * np.arange(mX[0, :].size) / float(N), filt, 'k', lw=1.3)
+plt.plot(fs * np.arange(mX.shape[1]) / float(N), filt, 'k', lw=1.3)
 plt.axis([0, fs / 2, -60, 7])
 plt.title('filter shape')
 
 plt.subplot(313)
-numFrames = int(mY[:, 0].size)
+numFrames = int(mY.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
-binFreq = np.arange(mY[0, :].size) * float(fs) / N
+binFreq = np.arange(mY.shape[1]) * float(fs) / N
 plt.pcolormesh(frmTime, binFreq, np.transpose(mY))
 plt.title('mY')
 plt.autoscale(tight=True)

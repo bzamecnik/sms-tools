@@ -40,7 +40,7 @@ def to_audio(mY, pY, M, H):
     returns y: output sound
     """
     hM1, hM2 = dft.half_window_sizes(M)
-    nFrames = mY[:, 0].size  # number of frames
+    nFrames = mY.shape[0]  # number of frames
     y = np.zeros(nFrames * H + hM1 + hM2)  # initialize output array
     pin = hM1
     for i in range(nFrames):  # iterate over all frames

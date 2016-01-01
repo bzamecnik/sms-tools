@@ -56,7 +56,7 @@ figure(1, figsize=(9, 6))
 
 mX, pX = stft.from_audio(audio, hamming(frameSize), frameSize, hopSize)
 maxplotfreq = 3000.0
-numFrames = int(mX[:, 0].size)
+numFrames = int(mX.shape[0])
 frmTime = hopSize * arange(numFrames) / float(sampleRate)
 binFreq = sampleRate * arange(frameSize * maxplotfreq / sampleRate) / frameSize
 plt.pcolormesh(frmTime, binFreq, np.transpose(mX[:, :frameSize * maxplotfreq / sampleRate + 1]))

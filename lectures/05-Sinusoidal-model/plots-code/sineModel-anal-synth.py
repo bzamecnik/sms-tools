@@ -23,7 +23,7 @@ H = Ns / 4
 tfreq, tmag, tphase = sine.from_audio(x1, fs, w, N, H, t, maxnSines, minSineDur, freqDevOffset, freqDevSlope)
 y = sine.to_audio(tfreq, tmag, tphase, Ns, H, fs)
 
-numFrames = int(tfreq[:, 0].size)
+numFrames = int(tfreq.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 maxplotfreq = 3000.0
 

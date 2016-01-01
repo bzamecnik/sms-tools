@@ -26,7 +26,7 @@ tfreq, tmag, tphase = sine.from_audio(x1, fs, w, N, H, t, maxnSines, minSineDur,
 plt.figure(1, figsize=(9.5, 7))
 maxplotfreq = 800.0
 maxplotbin = int(N * maxplotfreq / fs)
-numFrames = int(mX[:, 0].size)
+numFrames = int(mX.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 binFreq = np.arange(maxplotbin + 1) * float(fs) / N
 plt.pcolormesh(frmTime, binFreq, np.transpose(mX[:, :maxplotbin + 1]))

@@ -77,7 +77,7 @@ def to_audio(tfreq, tmag, tphase, N, H, fs):
     bh = bh / sum(bh)  # normalized blackmanharris window
     sw[hN - H:hN + H] = sw[hN - H:hN + H] / bh[hN - H:hN + H]  # normalized synthesis window
     lastytfreq = tfreq[0, :]  # initialize synthesis frequencies
-    ytphase = 2 * np.pi * np.random.rand(tfreq[0, :].size)  # initialize synthesis phases
+    ytphase = 2 * np.pi * np.random.rand(tfreq.shape[1])  # initialize synthesis phases
     for l in range(L):  # iterate over all frames
         if tphase.size > 0:  # if no phases generate them
             ytphase = tphase[l, :]
@@ -211,10 +211,10 @@ def clean_sinusoid_tracks(tfreq, minTrackLength=3):
     returns tfreqn: output frequency of tracks
     """
 
-    if tfreq.shape[1] == 0:  # if no tracks return input
+    # number of frames, number of tracks in a frame
+    nFrames, nTracks = tfreq.shape
+    if nTracks == 0:  # if no tracks return input
         return tfreq
-    nFrames = tfreq[:, 0].size  # number of frames
-    nTracks = tfreq[0, :].size  # number of tracks in a frame
     for t in range(nTracks):  # iterate over all tracks
         trackFreqs = tfreq[:, t]  # frequencies of one track
         trackBegs = np.nonzero((trackFreqs[:nFrames - 1] <= 0)  # beginning of track contours

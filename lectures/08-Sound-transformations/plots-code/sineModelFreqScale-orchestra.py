@@ -35,7 +35,7 @@ plt.axis([0, x.size / float(fs), min(x), max(x)])
 plt.title('x (orchestra.wav)')
 
 plt.subplot(4, 1, 2)
-numFrames = int(tfreq[:, 0].size)
+numFrames = int(tfreq.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 tracks = tfreq * np.less(tfreq, maxplotfreq)
 tracks[tracks <= 0] = np.nan
@@ -44,14 +44,14 @@ plt.autoscale(tight=True)
 plt.title('sine frequencies')
 
 maxplotbin = int(N * maxplotfreq / fs)
-numFrames = int(mX[:, 0].size)
+numFrames = int(mX.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 binFreq = np.arange(maxplotbin + 1) * float(fs) / N
 plt.pcolormesh(frmTime, binFreq, np.transpose(mX[:, :maxplotbin + 1]))
 plt.autoscale(tight=True)
 
 plt.subplot(4, 1, 3)
-numFrames = int(ytfreq[:, 0].size)
+numFrames = int(ytfreq.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 tracks = ytfreq * np.less(ytfreq, maxplotfreq)
 tracks[tracks <= 0] = np.nan
@@ -60,7 +60,7 @@ plt.autoscale(tight=True)
 plt.title('freq-scaled sine frequencies')
 
 maxplotbin = int(N * maxplotfreq / fs)
-numFrames = int(mY[:, 0].size)
+numFrames = int(mY.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 binFreq = np.arange(maxplotbin + 1) * float(fs) / N
 plt.pcolormesh(frmTime, binFreq, np.transpose(mY[:, :maxplotbin + 1]))

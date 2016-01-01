@@ -70,8 +70,8 @@ def main(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman', M
 
     # plot spectrogram stochastic component
     plt.subplot(3, 1, 2)
-    numFrames = int(stocEnv[:, 0].size)
-    sizeEnv = int(stocEnv[0, :].size)
+    numFrames = int(stocEnv.shape[0])
+    sizeEnv = int(stocEnv.shape[1])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = (.5 * fs) * np.arange(sizeEnv * maxplotfreq / (.5 * fs)) / sizeEnv
     plt.pcolormesh(frmTime, binFreq, np.transpose(stocEnv[:, :sizeEnv * maxplotfreq / (.5 * fs) + 1]))

@@ -56,7 +56,7 @@ def main(inputFile=demo_sound_path('piano.wav'), window='hamming', M=1024, N=102
 
     # plot magnitude spectrogram
     plt.subplot(4, 1, 2)
-    numFrames = int(mX[:, 0].size)
+    numFrames = int(mX.shape[0])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = fs * np.arange(N * maxplotfreq / fs) / N
     plt.pcolormesh(frmTime, binFreq, np.transpose(mX[:, :N * maxplotfreq / fs + 1]))
@@ -67,7 +67,7 @@ def main(inputFile=demo_sound_path('piano.wav'), window='hamming', M=1024, N=102
 
     # plot the phase spectrogram
     plt.subplot(4, 1, 3)
-    numFrames = int(pX[:, 0].size)
+    numFrames = int(pX.shape[0])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = fs * np.arange(N * maxplotfreq / fs) / N
     plt.pcolormesh(frmTime, binFreq, np.transpose(np.diff(pX[:, :N * maxplotfreq / fs + 1], axis=1)))

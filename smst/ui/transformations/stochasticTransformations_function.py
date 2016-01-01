@@ -51,7 +51,7 @@ def main(inputFile=demo_sound_path('rain.wav'), stocf=0.1, timeScaling=np.array(
 
     # plot stochastic representation
     plt.subplot(4, 1, 2)
-    numFrames = int(mYst[:, 0].size)
+    numFrames = int(mYst.shape[0])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = np.arange(stocf * H) * float(fs) / (stocf * 2 * H)
     plt.pcolormesh(frmTime, binFreq, np.transpose(mYst))
@@ -62,7 +62,7 @@ def main(inputFile=demo_sound_path('rain.wav'), stocf=0.1, timeScaling=np.array(
 
     # plot modified stochastic representation
     plt.subplot(4, 1, 3)
-    numFrames = int(ystocEnv[:, 0].size)
+    numFrames = int(ystocEnv.shape[0])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = np.arange(stocf * H) * float(fs) / (stocf * 2 * H)
     plt.pcolormesh(frmTime, binFreq, np.transpose(ystocEnv))

@@ -75,7 +75,7 @@ plt.vlines(yhfreq[frame, :], -100, yhmag[frame, :], lw=1.5, color='c')
 plt.axis([0, 5000, -80, -15])
 plt.title('y: harmonics')
 
-stocaxis = (fs1 / 2) * np.arange(stocEnv1[0, :].size) / float(stocEnv1[0, :].size)
+stocaxis = (fs1 / 2) * np.arange(stocEnv1.shape[1]) / float(stocEnv1.shape[1])
 plt.subplot(2, 3, 4)
 plt.plot(stocaxis, stocEnv1[frame, :], lw=1.5, marker='x', color='b')
 plt.axis([0, 20000, -73, -27])

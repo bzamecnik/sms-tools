@@ -143,7 +143,7 @@ def transformation_synthesis(inputFile, fs, hfreq, hmag, freqScaling=np.array([0
         tracks = np.copy(yhfreq)
         tracks = tracks * np.less(tracks, maxplotfreq)
         tracks[tracks <= 0] = np.nan
-        numFrames = int(tracks[:, 0].size)
+        numFrames = int(tracks.shape[0])
         frmTime = H * np.arange(numFrames) / float(fs)
         plt.plot(frmTime, tracks)
         plt.title('transformed harmonic tracks')

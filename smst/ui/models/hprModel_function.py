@@ -73,7 +73,7 @@ def main(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman', M
     # plot the magnitude spectrogram of residual
     plt.subplot(3, 1, 2)
     maxplotbin = int(N * maxplotfreq / fs)
-    numFrames = int(mXr[:, 0].size)
+    numFrames = int(mXr.shape[0])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = np.arange(maxplotbin + 1) * float(fs) / N
     plt.pcolormesh(frmTime, binFreq, np.transpose(mXr[:, :maxplotbin + 1]))
@@ -83,7 +83,7 @@ def main(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman', M
     if (hfreq.shape[1] > 0):
         harms = hfreq * np.less(hfreq, maxplotfreq)
         harms[harms == 0] = np.nan
-        numFrames = int(harms[:, 0].size)
+        numFrames = int(harms.shape[0])
         frmTime = H * np.arange(numFrames) / float(fs)
         plt.plot(frmTime, harms, color='k', ms=3, alpha=1)
         plt.xlabel('time(s)')

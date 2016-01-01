@@ -74,7 +74,7 @@ def main(inputFile=demo_sound_path('bendir.wav'), window='hamming', M=2001, N=20
     # plot the magnitude spectrogram of residual
     plt.subplot(3, 1, 2)
     maxplotbin = int(N * maxplotfreq / fs)
-    numFrames = int(mXr[:, 0].size)
+    numFrames = int(mXr.shape[0])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = np.arange(maxplotbin + 1) * float(fs) / N
     plt.pcolormesh(frmTime, binFreq, np.transpose(mXr[:, :maxplotbin + 1]))
