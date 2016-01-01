@@ -26,7 +26,7 @@ f0 = peaks.clean_sinusoid_track(f0, 5)
 yf0 = synth.synthesize_sinusoid(f0, .8, H, fs)
 f0[f0 == 0] = np.nan
 maxplotfreq = 800.0
-numFrames = int(mX[:, 0].size)
+numFrames = int(mX.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 binFreq = fs * np.arange(N * maxplotfreq / fs) / N
 plt.pcolormesh(frmTime, binFreq, np.transpose(mX[:, :N * maxplotfreq / fs + 1]))

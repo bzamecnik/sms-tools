@@ -7,6 +7,7 @@ import tkMessageBox
 
 from . import hpsModel_function
 from smst.utils import audio
+from smst.utils.files import strip_file
 
 
 class HpsModelFrame:
@@ -146,7 +147,7 @@ class HpsModelFrame:
         output_label = "Sinusoidal:"
         Label(self.parent, text=output_label).grid(row=15, column=0, sticky=W, padx=5, pady=(10, 0))
         self.output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + os.path.basename(self.filelocation.get())[:-4] + '_hpsModel_sines.wav'), bg="gray30",
+            'output_sounds/' + strip_file(self.filelocation.get()) + '_hpsModel_sines.wav'), bg="gray30",
                              fg="white")
         self.output.grid(row=15, column=0, padx=(80, 5), pady=(10, 0), sticky=W)
 
@@ -154,7 +155,7 @@ class HpsModelFrame:
         output_label = "Stochastic:"
         Label(self.parent, text=output_label).grid(row=16, column=0, sticky=W, padx=5, pady=(5, 0))
         self.output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + os.path.basename(self.filelocation.get())[:-4] + '_hpsModel_stochastic.wav'),
+            'output_sounds/' + strip_file(self.filelocation.get()) + '_hpsModel_stochastic.wav'),
                              bg="gray30", fg="white")
         self.output.grid(row=16, column=0, padx=(80, 5), pady=(5, 0), sticky=W)
 
@@ -162,7 +163,7 @@ class HpsModelFrame:
         output_label = "Output:"
         Label(self.parent, text=output_label).grid(row=17, column=0, sticky=W, padx=5, pady=(5, 15))
         self.output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + os.path.basename(self.filelocation.get())[:-4] + '_hpsModel.wav'), bg="gray30",
+            'output_sounds/' + strip_file(self.filelocation.get()) + '_hpsModel.wav'), bg="gray30",
                              fg="white")
         self.output.grid(row=17, column=0, padx=(80, 5), pady=(5, 15), sticky=W)
 

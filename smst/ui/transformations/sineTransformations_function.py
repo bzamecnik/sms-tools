@@ -9,6 +9,7 @@ from scipy.signal import get_window
 from smst.utils import audio, files
 from smst.models import sine
 from .. import demo_sound_path
+from smst.utils.files import strip_file
 
 
 def analysis(inputFile=demo_sound_path('mridangam.wav'), window='hamming', M=801, N=2048, t=-90,
@@ -46,7 +47,7 @@ def analysis(inputFile=demo_sound_path('mridangam.wav'), window='hamming', M=801
     y = sine.to_audio(tfreq, tmag, np.array([]), Ns, H, fs)
 
     # output sound file (monophonic with sampling rate of 44100)
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_sineModel.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_sineModel.wav'
 
     # write the sound resulting from the inverse stft
     audio.write_wav(y, fs, outputFile)
@@ -71,7 +72,7 @@ def analysis(inputFile=demo_sound_path('mridangam.wav'), window='hamming', M=801
         tracks = np.copy(tfreq)
         tracks = tracks * np.less(tracks, maxplotfreq)
         tracks[tracks <= 0] = np.nan
-        numFrames = int(tracks[:, 0].size)
+        numFrames = int(tracks.shape[0])
         frmTime = H * np.arange(numFrames) / float(fs)
         plt.plot(frmTime, tracks)
         plt.axis([0, x.size / float(fs), 0, maxplotfreq])
@@ -122,7 +123,7 @@ def transformation_synthesis(inputFile, fs, tfreq, tmag, freqScaling=np.array([0
     y = sine.to_audio(ytfreq, ytmag, np.array([]), Ns, H, fs)
 
     # write output sound
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_sineModelTransformation.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_sineModelTransformation.wav'
     audio.write_wav(y, fs, outputFile)
 
     # create figure to plot
@@ -137,7 +138,7 @@ def transformation_synthesis(inputFile, fs, tfreq, tmag, freqScaling=np.array([0
         tracks = np.copy(ytfreq)
         tracks = tracks * np.less(tracks, maxplotfreq)
         tracks[tracks <= 0] = np.nan
-        numFrames = int(tracks[:, 0].size)
+        numFrames = int(tracks.shape[0])
         frmTime = H * np.arange(numFrames) / float(fs)
         plt.plot(frmTime, tracks)
         plt.title('transformed sinusoidal tracks')

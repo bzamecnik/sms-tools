@@ -9,6 +9,7 @@ from scipy.signal import get_window
 from smst.utils import audio, files
 from smst.models import hps
 from .. import demo_sound_path
+from smst.utils.files import strip_file
 
 
 def main(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman', M=601, N=1024, t=-100,
@@ -45,9 +46,11 @@ def main(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman', M
     y, yh, yst = hps.to_audio(hfreq, hmag, hphase, stocEnv, Ns, H, fs)
 
     # output sound file (monophonic with sampling rate of 44100)
-    outputFileSines = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_hpsModel_sines.wav'
-    outputFileStochastic = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_hpsModel_stochastic.wav'
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_hpsModel.wav'
+    baseFileName = strip_file(inputFile)
+    outputFileSines, outputFileStochastic, outputFile = [
+        'output_sounds/%s_hpsModel%s.wav' % (baseFileName, i)
+        for i in ('_sines', '_stochastic', '')
+    ]
 
     # write sounds files for harmonics, stochastic, and the sum
     audio.write_wav(yh, fs, outputFileSines)
@@ -70,8 +73,8 @@ def main(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman', M
 
     # plot spectrogram stochastic component
     plt.subplot(3, 1, 2)
-    numFrames = int(stocEnv[:, 0].size)
-    sizeEnv = int(stocEnv[0, :].size)
+    numFrames = int(stocEnv.shape[0])
+    sizeEnv = int(stocEnv.shape[1])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = (.5 * fs) * np.arange(sizeEnv * maxplotfreq / (.5 * fs)) / sizeEnv
     plt.pcolormesh(frmTime, binFreq, np.transpose(stocEnv[:, :sizeEnv * maxplotfreq / (.5 * fs) + 1]))

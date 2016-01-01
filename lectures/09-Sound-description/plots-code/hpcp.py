@@ -33,7 +33,7 @@ plt.ylabel('amplitude')
 plt.title('x (cello-double.wav)')
 
 plt.subplot(2, 1, 2)
-numFrames = int(hpcps[:, 0].size)
+numFrames = int(hpcps.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 plt.pcolormesh(frmTime, np.arange(12), np.transpose(hpcps))
 plt.ylabel('spectral bins')

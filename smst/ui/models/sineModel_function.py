@@ -9,6 +9,7 @@ from scipy.signal import get_window
 from smst.utils import audio, files
 from smst.models import sine
 from .. import demo_sound_path
+from smst.utils.files import strip_file
 
 
 def main(inputFile=demo_sound_path('bendir.wav'), window='hamming', M=2001, N=2048, t=-80, minSineDur=0.02,
@@ -44,7 +45,7 @@ def main(inputFile=demo_sound_path('bendir.wav'), window='hamming', M=2001, N=20
     y = sine.to_audio(tfreq, tmag, tphase, Ns, H, fs)
 
     # output sound file name
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_sineModel.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_sineModel.wav'
 
     # write the synthesized sound obtained from the sinusoidal synthesis
     audio.write_wav(y, fs, outputFile)

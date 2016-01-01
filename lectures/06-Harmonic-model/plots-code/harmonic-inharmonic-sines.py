@@ -25,7 +25,7 @@ tfreq, tmag, tphase = sine.from_audio(x, fs, w, N, H, t, maxnSines, minSineDur, 
 
 maxplotfreq = 10000.0
 maxplotbin = int(N * maxplotfreq / fs)
-numFrames = int(mX[:, 0].size)
+numFrames = int(mX.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 binFreq = np.arange(maxplotbin + 1) * float(fs) / N
 plt.pcolormesh(frmTime, binFreq, np.transpose(mX[:, :maxplotbin + 1]))
@@ -52,7 +52,7 @@ tfreq, tmag, tphase = sine.from_audio(x, fs, w, N, H, t, maxnSines, minSineDur, 
 
 maxplotfreq = 5000.0
 maxplotbin = int(N * maxplotfreq / fs)
-numFrames = int(mX[:, 0].size)
+numFrames = int(mX.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 binFreq = np.arange(maxplotbin + 1) * float(fs) / N
 plt.pcolormesh(frmTime, binFreq, np.transpose(mX[:, :maxplotbin + 1]))

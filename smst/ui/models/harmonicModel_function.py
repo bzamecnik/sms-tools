@@ -44,7 +44,7 @@ def main(inputFile=demo_sound_path('vignesh.wav'), window='blackman', M=1201, N=
     y = sine.to_audio(hfreq, hmag, hphase, Ns, H, fs)
 
     # output sound file (monophonic with sampling rate of 44100)
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_harmonicModel.wav'
+    outputFile = 'output_sounds/' + files.strip_file(inputFile) + '_harmonicModel.wav'
 
     # write the sound resulting from harmonic analysis
     audio.write_wav(y, fs, outputFile)

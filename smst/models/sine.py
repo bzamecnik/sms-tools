@@ -1,74 +1,83 @@
-# functions that implement analysis and synthesis of sounds using the Sinusoidal Model
-# (for example usage check the examples models_interface)
-
-import math
+"""
+Functions that implement analysis and synthesis of sounds using the Sinusoidal Model.
+"""
 
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.signal import blackmanharris, triang
 from scipy.fftpack import ifft, fftshift
 
-from . import dft
+from . import dft, stft
 from ..utils import peaks, synth
 
 
 def from_audio(x, fs, w, N, H, t, maxnSines=100, minSineDur=.01, freqDevOffset=20, freqDevSlope=0.01):
     """
-    Analysis of a sound using the sinusoidal model with sine tracking
-    x: input array sound, w: analysis window, N: size of complex spectrum, H: hop-size, t: threshold in negative dB
-    maxnSines: maximum number of sines per frame, minSineDur: minimum duration of sines in seconds
-    freqDevOffset: minimum frequency deviation at 0Hz, freqDevSlope: slope increase of minimum frequency deviation
-    returns xtfreq, xtmag, xtphase: frequencies, magnitudes and phases of sinusoidal tracks
+    Analyzes a sound using the sinusoidal model with sine tracking.
+
+    :param x: input array sound
+    :param w: analysis window
+    :param N: size of complex spectrum
+    :param H: hop-size
+    :param t: threshold in negative dB
+    :param maxnSines: maximum number of sines per frame
+    :param minSineDur: minimum duration of sines in seconds
+    :param freqDevOffset: minimum frequency deviation at 0Hz
+    :param freqDevSlope: slope increase of minimum frequency deviation
+    :returns: xtfreq, xtmag, xtphase: frequencies, magnitudes and phases of sinusoidal tracks
     """
 
-    if (minSineDur < 0):  # raise error if minSineDur is smaller than 0
+    if minSineDur < 0:  # raise error if minSineDur is smaller than 0
         raise ValueError("Minimum duration of sine tracks smaller than 0")
 
-    hM1 = int(math.floor((w.size + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(w.size / 2))  # half analysis window size by floor
-    x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
-    x = np.append(x, np.zeros(hM2))  # add zeros at the end to analyze last sample
-    pin = hM1  # initialize sound pointer in middle of analysis window
-    pend = x.size - hM1  # last sample to start a frame
+    hM1, hM2 = dft.half_window_sizes(w.size)
+    x_padded = stft.pad_signal(x, hM2)
     w = w / sum(w)  # normalize analysis window
+
+    def limit_tracks(tr):
+        # limit number of tracks to maxnSines
+        return np.resize(tr, min(maxnSines, tr.size))
+
+    def pad_tracks(tr):
+        tr_padded = np.zeros(maxnSines)
+        tr_padded[:tfreq.size] = tr
+        return tr_padded
+
     tfreq = np.array([])
-    while pin < pend:  # while input sound pointer is within sound
-        x1 = x[pin - hM1:pin + hM2]  # select frame
-        mX, pX = dft.from_audio(x1, w, N)  # compute dft
+    # xtfreq, xtmag, xtphase
+    xt = ([], [], [])
+    for x_frame in stft.iterate_analysis_frames(x_padded, H, hM1, hM2):
+        mX, pX = dft.from_audio(x_frame, w, N)  # compute dft
         ploc = peaks.find_peaks(mX, t)  # detect locations of peaks
         iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values by interpolation
         ipfreq = fs * iploc / float(N)  # convert peak locations to Hertz
         # perform sinusoidal tracking by adding peaks to trajectories
-        tfreq, tmag, tphase = track_sinusoids(ipfreq, ipmag, ipphase, tfreq, freqDevOffset, freqDevSlope)
-        tfreq = np.resize(tfreq, min(maxnSines, tfreq.size))  # limit number of tracks to maxnSines
-        tmag = np.resize(tmag, min(maxnSines, tmag.size))  # limit number of tracks to maxnSines
-        tphase = np.resize(tphase, min(maxnSines, tphase.size))  # limit number of tracks to maxnSines
-        jtfreq = np.zeros(maxnSines)  # temporary output array
-        jtmag = np.zeros(maxnSines)  # temporary output array
-        jtphase = np.zeros(maxnSines)  # temporary output array
-        jtfreq[:tfreq.size] = tfreq  # save track frequencies to temporary array
-        jtmag[:tmag.size] = tmag  # save track magnitudes to temporary array
-        jtphase[:tphase.size] = tphase  # save track magnitudes to temporary array
-        if pin == hM1:  # if first frame initialize output sine tracks
-            xtfreq = jtfreq
-            xtmag = jtmag
-            xtphase = jtphase
-        else:  # rest of frames append values to sine tracks
-            xtfreq = np.vstack((xtfreq, jtfreq))
-            xtmag = np.vstack((xtmag, jtmag))
-            xtphase = np.vstack((xtphase, jtphase))
-        pin += H
+        track_frame = track_sinusoids(ipfreq, ipmag, ipphase, tfreq, freqDevOffset, freqDevSlope)
+        track_frame = [limit_tracks(tr_comp) for tr_comp in track_frame]
+        tfreq = track_frame[0]
+
+        for tr_comp, tracks in zip(track_frame, xt):
+            tracks.append(pad_tracks(tr_comp))
+
+    xtfreq, xtmag, xtphase = [np.vstack(xt_comp) for xt_comp in xt]
+
     # delete sine tracks shorter than minSineDur
     xtfreq = clean_sinusoid_tracks(xtfreq, round(fs * minSineDur / H))
+
     return xtfreq, xtmag, xtphase
 
 
 def to_audio(tfreq, tmag, tphase, N, H, fs):
     """
-    Synthesis of a sound using the sinusoidal model
-    tfreq,tmag,tphase: frequencies, magnitudes and phases of sinusoids
-    N: synthesis FFT size, H: hop size, fs: sampling rate
-    returns y: output array sound
+    Synthesizes a sound using the sinusoidal model.
+
+    :param tfreq: frequencies of sinusoids
+    :param tmag: magnitudes of sinusoids
+    :param tphase: phases of sinusoids
+    :param N: synthesis FFT size
+    :param H: hop size
+    :param fs: sampling rate
+    :returns: y: output array sound
     """
 
     hN = N / 2  # half of FFT size for synthesis
@@ -76,14 +85,11 @@ def to_audio(tfreq, tmag, tphase, N, H, fs):
     pout = 0  # initialize output sound pointer
     ysize = H * (L + 3)  # output sound size
     y = np.zeros(ysize)  # initialize output array
-    sw = np.zeros(N)  # initialize synthesis window
-    ow = triang(2 * H)  # triangular window
-    sw[hN - H:hN + H] = ow  # add triangular window
-    bh = blackmanharris(N)  # blackmanharris window
-    bh = bh / sum(bh)  # normalized blackmanharris window
-    sw[hN - H:hN + H] = sw[hN - H:hN + H] / bh[hN - H:hN + H]  # normalized synthesis window
+
+    sw = create_synth_window(N, H)
+
     lastytfreq = tfreq[0, :]  # initialize synthesis frequencies
-    ytphase = 2 * np.pi * np.random.rand(tfreq[0, :].size)  # initialize synthesis phases
+    ytphase = 2 * np.pi * np.random.rand(tfreq.shape[1])  # initialize synthesis phases
     for l in range(L):  # iterate over all frames
         if tphase.size > 0:  # if no phases generate them
             ytphase = tphase[l, :]
@@ -103,10 +109,12 @@ def to_audio(tfreq, tmag, tphase, N, H, fs):
 
 def scale_time(sfreq, smag, timeScaling):
     """
-    Time scaling of sinusoidal tracks
-    sfreq, smag: frequencies and magnitudes of input sinusoidal tracks
-    timeScaling: scaling factors, in time-value pairs
-    returns ysfreq, ysmag: frequencies and magnitudes of output sinusoidal tracks
+    Scales sinusoidal tracks in time.
+
+    :param sfreq: frequencies of input sinusoidal tracks
+    :param smag: magnitudes of input sinusoidal tracks
+    :param timeScaling: scaling factors, in time-value pairs
+    :returns: ysfreq, ysmag: frequencies and magnitudes of output sinusoidal tracks
     """
     if timeScaling.size % 2 != 0:  # raise exception if array not even length
         raise ValueError("Time scaling array does not have an even size")
@@ -129,12 +137,13 @@ def scale_time(sfreq, smag, timeScaling):
 
 def scale_frequencies(sfreq, freqScaling):
     """
-    Frequency scaling of sinusoidal tracks
-    sfreq: frequencies of input sinusoidal tracks
-    freqScaling: scaling factors, in time-value pairs (value of 1 is no scaling)
-    returns ysfreq: frequencies of output sinusoidal tracks
+    Scales sinusoidal tracks in frequency.
+
+    :param sfreq: frequencies of input sinusoidal tracks
+    :param freqScaling: scaling factors, in time-value pairs (value of 1 is no scaling)
+    :returns: ysfreq: frequencies of output sinusoidal tracks
     """
-    if (freqScaling.size % 2 != 0):  # raise exception if array not even length
+    if freqScaling.size % 2 != 0:  # raise exception if array not even length
         raise ValueError("Frequency scaling array does not have an even size")
 
     L = sfreq.shape[0]  # number of input frames
@@ -153,12 +162,15 @@ def scale_frequencies(sfreq, freqScaling):
 
 def track_sinusoids(pfreq, pmag, pphase, tfreq, freqDevOffset=20, freqDevSlope=0.01):
     """
-    Tracking sinusoids from one frame to the next
-    pfreq, pmag, pphase: frequencies and magnitude of current frame
-    tfreq: frequencies of incoming tracks from previous frame
-    freqDevOffset: minimum frequency deviation at 0Hz
-    freqDevSlope: slope increase of minimum frequency deviation
-    returns tfreqn, tmagn, tphasen: frequency, magnitude and phase of tracks
+    Tracks sinusoids from one frame to the next.
+
+    :param pfreq: frequencies of current frame
+    :param pmag: magnitude of current frame
+    :param pphase: phases of current frame
+    :param tfreq: frequencies of incoming tracks from previous frame
+    :param freqDevOffset: minimum frequency deviation at 0Hz
+    :param freqDevSlope: slope increase of minimum frequency deviation
+    :returns: tfreqn, tmagn, tphasen: frequency, magnitude and phase of tracks
     """
 
     tfreqn = np.zeros(tfreq.size)  # initialize array for output frequencies
@@ -195,11 +207,11 @@ def track_sinusoids(pfreq, pmag, pphase, tfreq, freqDevOffset=20, freqDevSlope=0
     # create new tracks from non used peaks
     emptyt = np.array(np.nonzero(tfreq == 0), dtype=np.int)[0]  # indexes of empty incoming tracks
     peaksleft = np.argsort(-pmagt)  # sort left peaks by magnitude
-    if ((peaksleft.size > 0) & (emptyt.size >= peaksleft.size)):  # fill empty tracks
+    if (peaksleft.size > 0) & (emptyt.size >= peaksleft.size):  # fill empty tracks
         tfreqn[emptyt[:peaksleft.size]] = pfreqt[peaksleft]
         tmagn[emptyt[:peaksleft.size]] = pmagt[peaksleft]
         tphasen[emptyt[:peaksleft.size]] = pphaset[peaksleft]
-    elif ((peaksleft.size > 0) & (emptyt.size < peaksleft.size)):  # add more tracks if necessary
+    elif (peaksleft.size > 0) & (emptyt.size < peaksleft.size):  # add more tracks if necessary
         tfreqn[emptyt] = pfreqt[peaksleft[:emptyt.size]]
         tmagn[emptyt] = pmagt[peaksleft[:emptyt.size]]
         tphasen[emptyt] = pphaset[peaksleft[:emptyt.size]]
@@ -209,30 +221,48 @@ def track_sinusoids(pfreq, pmag, pphase, tfreq, freqDevOffset=20, freqDevSlope=0
     return tfreqn, tmagn, tphasen
 
 
-def clean_sinusoid_tracks(tfreq, minTrackLength=3):
+def clean_sinusoid_tracks(track_freqs, min_frames=3):
     """
-    Delete short fragments of a collection of sinusoidal tracks
-    tfreq: frequency of tracks
-    minTrackLength: minimum duration of tracks in number of frames
-    returns tfreqn: output frequency of tracks
+    Deletes short fragments of a collection of sinusoidal tracks.
+
+    :param track_freqs: frequencies of sinusoidal tracks
+    :param min_frames: minimum duration of a track (in number of frames)
+    :returns: cleaned frequencies of tracks
     """
 
-    if tfreq.shape[1] == 0:  # if no tracks return input
-        return tfreq
-    nFrames = tfreq[:, 0].size  # number of frames
-    nTracks = tfreq[0, :].size  # number of tracks in a frame
-    for t in range(nTracks):  # iterate over all tracks
-        trackFreqs = tfreq[:, t]  # frequencies of one track
-        trackBegs = np.nonzero((trackFreqs[:nFrames - 1] <= 0)  # beginning of track contours
-                               & (trackFreqs[1:] > 0))[0] + 1
-        if trackFreqs[0] > 0:
-            trackBegs = np.insert(trackBegs, 0, 0)
-        trackEnds = np.nonzero((trackFreqs[:nFrames - 1] > 0)  # end of track contours
-                               & (trackFreqs[1:] <= 0))[0] + 1
-        if trackFreqs[nFrames - 1] > 0:
-            trackEnds = np.append(trackEnds, nFrames - 1)
-        trackLengths = 1 + trackEnds - trackBegs  # lengths of track contours
-        for i, j in zip(trackBegs, trackLengths):  # delete short track contours
-            if j <= minTrackLength:
-                trackFreqs[i:i + j] = 0
-    return tfreq
+    # number of frames, number of tracks in a frame
+    frame_count, track_count = track_freqs.shape
+
+    if track_count == 0:  # if no tracks return input
+        return track_freqs
+
+    # iterate over all tracks
+    for track_index in range(track_count):
+        # frequencies of one track
+        freqs = track_freqs[:, track_index]
+        # beginning of track contours
+        starts = np.nonzero((freqs[:frame_count - 1] <= 0) & (freqs[1:] > 0))[0] + 1
+        if freqs[0] > 0:
+            starts = np.insert(starts, 0, 0)
+        # end of track contours
+        ends = np.nonzero((freqs[:frame_count - 1] > 0) & (freqs[1:] <= 0))[0] + 1
+        if freqs[frame_count - 1] > 0:
+            ends = np.append(ends, frame_count - 1)
+        # lengths of track contours
+        lengths = 1 + ends - starts
+        # delete short track contours
+        for start, length in zip(starts, lengths):
+            if length <= min_frames:
+                freqs[start:start + length] = 0
+    return track_freqs
+
+
+def create_synth_window(N, H):
+    hN = N / 2
+    sw = np.zeros(N)  # initialize synthesis window
+    ow = triang(2 * H)  # triangular window
+    sw[hN - H:hN + H] = ow  # add triangular window
+    bh = blackmanharris(N)  # blackman-harris window
+    bh = bh / sum(bh)  # normalized window
+    sw[hN - H:hN + H] = sw[hN - H:hN + H] / bh[hN - H:hN + H]  # normalized synthesis window
+    return sw

@@ -8,6 +8,7 @@ import numpy as np
 from smst.utils import audio, files
 from smst.models import stochastic
 from .. import demo_sound_path
+from smst.utils.files import strip_file
 
 
 def main(inputFile=demo_sound_path('rain.wav'), stocf=0.1, timeScaling=np.array([0, 0, 1, 2]),
@@ -35,7 +36,7 @@ def main(inputFile=demo_sound_path('rain.wav'), stocf=0.1, timeScaling=np.array(
     y = stochastic.to_audio(ystocEnv, H, H * 2)
 
     # write output sound
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_stochasticModelTransformation.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_stochasticModelTransformation.wav'
     audio.write_wav(y, fs, outputFile)
 
     # create figure to plot
@@ -51,7 +52,7 @@ def main(inputFile=demo_sound_path('rain.wav'), stocf=0.1, timeScaling=np.array(
 
     # plot stochastic representation
     plt.subplot(4, 1, 2)
-    numFrames = int(mYst[:, 0].size)
+    numFrames = int(mYst.shape[0])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = np.arange(stocf * H) * float(fs) / (stocf * 2 * H)
     plt.pcolormesh(frmTime, binFreq, np.transpose(mYst))
@@ -62,7 +63,7 @@ def main(inputFile=demo_sound_path('rain.wav'), stocf=0.1, timeScaling=np.array(
 
     # plot modified stochastic representation
     plt.subplot(4, 1, 3)
-    numFrames = int(ystocEnv[:, 0].size)
+    numFrames = int(ystocEnv.shape[0])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = np.arange(stocf * H) * float(fs) / (stocf * 2 * H)
     plt.pcolormesh(frmTime, binFreq, np.transpose(ystocEnv))

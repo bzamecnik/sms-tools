@@ -2,7 +2,7 @@ import os
 
 
 def strip_file(filePath):
-    """extracts file name without directories and extension"""
+    """Extracts file name without directories and extension."""
     return os.path.splitext(os.path.basename(filePath))[0]
 
 

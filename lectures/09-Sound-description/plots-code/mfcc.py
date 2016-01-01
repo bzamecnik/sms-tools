@@ -31,7 +31,7 @@ plt.ylabel('amplitude')
 plt.title('x (speech-male.wav)')
 
 plt.subplot(2, 1, 2)
-numFrames = int(mfccs[:, 0].size)
+numFrames = int(mfccs.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 plt.pcolormesh(frmTime, 1 + np.arange(12), np.transpose(mfccs[:, 1:]))
 plt.ylabel('coefficients')

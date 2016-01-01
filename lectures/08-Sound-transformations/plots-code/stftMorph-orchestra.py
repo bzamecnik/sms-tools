@@ -25,7 +25,7 @@ maxplotfreq = 10000.0
 
 plt.figure(1, figsize=(12, 9))
 plt.subplot(311)
-numFrames = int(mX[:, 0].size)
+numFrames = int(mX.shape[0])
 frmTime = H1 * np.arange(numFrames) / float(fs)
 binFreq = fs * np.arange(N1 * maxplotfreq / fs) / N1
 plt.pcolormesh(frmTime, binFreq, np.transpose(mX[:, :N1 * maxplotfreq / fs + 1]))
@@ -33,17 +33,17 @@ plt.title('mX (orchestra.wav)')
 plt.autoscale(tight=True)
 
 plt.subplot(312)
-numFrames = int(mX2[:, 0].size)
+numFrames = int(mX2.shape[0])
 frmTime = H1 * np.arange(numFrames) / float(fs)
 
-N = 2 * mX2[0, :].size
+N = 2 * mX2.shape[1]
 binFreq = fs * np.arange(N * maxplotfreq / fs) / N
 plt.pcolormesh(frmTime, binFreq, np.transpose(mX2[:, :N * maxplotfreq / fs + 1]))
 plt.title('mX2 (speech-male.wav)')
 plt.autoscale(tight=True)
 
 plt.subplot(313)
-numFrames = int(mY[:, 0].size)
+numFrames = int(mY.shape[0])
 frmTime = H1 * np.arange(numFrames) / float(fs)
 binFreq = fs * np.arange(N1 * maxplotfreq / fs) / N1
 plt.pcolormesh(frmTime, binFreq, np.transpose(mY[:, :N1 * maxplotfreq / fs + 1]))

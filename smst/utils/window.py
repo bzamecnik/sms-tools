@@ -3,9 +3,10 @@ import numpy as np
 
 def blackman_harris_lobe(x):
     """
-    Generate the main lobe of a Blackman-Harris window
-    x: bin positions to compute (real values)
-    returns y: main lobe os spectrum of a Blackman-Harris window
+    Generates the main lobe of a Blackman-Harris window.
+
+    :param x: bin positions to compute (real values)
+    :returns: y: main lobe os spectrum of a Blackman-Harris window
     """
 
     N = 512  # size of fft to use
@@ -21,9 +22,11 @@ def blackman_harris_lobe(x):
 
 def sinc(x, N):
     """
-    Generate the main lobe of a sinc function (Dirichlet kernel)
-    x: array of indexes to compute; N: size of FFT to simulate
-    returns y: samples of the main lobe of a sinc function
+    Generates the main lobe of a sinc function (Dirichlet kernel).
+
+    :param x: array of indexes to compute
+    :param N: size of FFT to simulate
+    :returns: y: samples of the main lobe of a sinc function
     """
 
     y = np.sin(N * x / 2) / np.sin(x / 2)  # compute the sinc function

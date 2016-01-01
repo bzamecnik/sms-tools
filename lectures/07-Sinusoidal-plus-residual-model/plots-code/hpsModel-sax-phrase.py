@@ -34,15 +34,15 @@ plt.autoscale(tight=True)
 plt.title('x (sax-phrase-short.wav)')
 
 plt.subplot(312)
-numFrames = int(mYst[:, 0].size)
-sizeEnv = int(mYst[0, :].size)
+numFrames = int(mYst.shape[0])
+sizeEnv = int(mYst.shape[1])
 frmTime = H * np.arange(numFrames) / float(fs)
 binFreq = (.5 * fs) * np.arange(sizeEnv * maxplotfreq / (.5 * fs)) / sizeEnv
 plt.pcolormesh(frmTime, binFreq, np.transpose(mYst[:, :sizeEnv * maxplotfreq / (.5 * fs) + 1]))
 
 harms = hfreq * np.less(hfreq, maxplotfreq)
 harms[harms == 0] = np.nan
-numFrames = int(harms[:, 0].size)
+numFrames = int(harms.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 plt.plot(frmTime, harms, color='k', ms=3, alpha=1)
 plt.autoscale(tight=True)

@@ -29,10 +29,10 @@ def main(inputFile=demo_sound_path('piano.wav'), window='blackman', M=511, N=102
     sample = int(time * fs)
     if (sample + M >= x.size or sample < 0):  # raise error if time outside of sound
         raise ValueError("Time outside sound boundaries")
-    x1 = x[sample:sample + M]
+    x_frame = x[sample:sample + M]
 
     # compute the dft of the sound fragment
-    mX, pX = dft.from_audio(x1, w, N)
+    mX, pX = dft.from_audio(x_frame, w, N)
 
     # compute the inverse dft of the spectrum
     y = dft.to_audio(mX, pX, w.size) * sum(w)
@@ -42,8 +42,8 @@ def main(inputFile=demo_sound_path('piano.wav'), window='blackman', M=511, N=102
 
     # plot the sound fragment
     plt.subplot(4, 1, 1)
-    plt.plot(time + np.arange(M) / float(fs), x1)
-    plt.axis([time, time + M / float(fs), min(x1), max(x1)])
+    plt.plot(time + np.arange(M) / float(fs), x_frame)
+    plt.axis([time, time + M / float(fs), min(x_frame), max(x_frame)])
     plt.ylabel('amplitude')
     plt.xlabel('time (sec)')
     plt.title('input sound: x')

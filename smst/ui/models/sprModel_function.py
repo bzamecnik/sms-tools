@@ -9,6 +9,7 @@ from scipy.signal import get_window
 from smst.utils import audio, files
 from smst.models import spr, stft
 from .. import demo_sound_path
+from smst.utils.files import strip_file
 
 
 def main(inputFile=demo_sound_path('bendir.wav'), window='hamming', M=2001, N=2048, t=-80,
@@ -48,9 +49,11 @@ def main(inputFile=demo_sound_path('bendir.wav'), window='hamming', M=2001, N=20
     y, ys = spr.to_audio(tfreq, tmag, tphase, xr, Ns, H, fs)
 
     # output sound file (monophonic with sampling rate of 44100)
-    outputFileSines = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_sprModel_sines.wav'
-    outputFileResidual = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_sprModel_residual.wav'
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_sprModel.wav'
+    baseFileName = strip_file(inputFile)
+    outputFileSines, outputFileResidual, outputFile = [
+        'output_sounds/%s_sprModel%s.wav' % (baseFileName, i)
+        for i in ('_sines', '_residual', '')
+    ]
 
     # write sounds files for sinusoidal, residual, and the sum
     audio.write_wav(ys, fs, outputFileSines)
@@ -74,7 +77,7 @@ def main(inputFile=demo_sound_path('bendir.wav'), window='hamming', M=2001, N=20
     # plot the magnitude spectrogram of residual
     plt.subplot(3, 1, 2)
     maxplotbin = int(N * maxplotfreq / fs)
-    numFrames = int(mXr[:, 0].size)
+    numFrames = int(mXr.shape[0])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = np.arange(maxplotbin + 1) * float(fs) / N
     plt.pcolormesh(frmTime, binFreq, np.transpose(mXr[:, :maxplotbin + 1]))

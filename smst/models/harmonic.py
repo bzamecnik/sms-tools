@@ -1,76 +1,81 @@
-# functions that implement analysis and synthesis of sounds using the Harmonic Model
-# (for example usage check the models_interface directory)
-
-import math
+"""
+Functions that implement analysis and synthesis of sounds using the Harmonic Model.
+"""
 
 import numpy as np
 from scipy.interpolate import interp1d
-from scipy.signal import blackmanharris, triang
-from scipy.fftpack import ifft
 
-from . import dft, sine
-from ..utils import peaks, synth
+from . import dft, sine, stft
+from ..utils import peaks
 
 
 def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, minSineDur=.02):
     """
-    Analysis of a sound using the sinusoidal harmonic model
-    x: input sound; fs: sampling rate, w: analysis window; N: FFT size (minimum 512); t: threshold in negative dB,
-    nH: maximum number of harmonics;  minf0: minimum f0 frequency in Hz,
-    maxf0: maximim f0 frequency in Hz; f0et: error threshold in the f0 detection (ex: 5),
-    harmDevSlope: slope of harmonic deviation; minSineDur: minimum length of harmonics
-    returns xhfreq, xhmag, xhphase: harmonic frequencies, magnitudes and phases
+    Analyzes a sound using the sinusoidal harmonic model.
+
+    :param x: input sound
+    :param fs: sampling rate
+    :param w: analysis window
+    :param N: FFT size (minimum 512)
+    :param t: threshold in negative dB
+    :param nH: maximum number of harmonics
+    :param minf0: minimum f0 frequency in Hz
+    :param maxf0: maximum f0 frequency in Hz
+    :param f0et: error threshold in the f0 detection (ex: 5)
+    :param harmDevSlope: slope of harmonic deviation
+    :param minSineDur: minimum length of harmonics
+    :returns: xhfreq, xhmag, xhphase: harmonic frequencies, magnitudes and phases
     """
 
     if minSineDur < 0:  # raise exception if minSineDur is smaller than 0
         raise ValueError("Minimum duration of sine tracks smaller than 0")
 
-    hM1 = int(math.floor((w.size + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(w.size / 2))  # half analysis window size by floor
-    x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
-    x = np.append(x, np.zeros(hM2))  # add zeros at the end to analyze last sample
-    pin = hM1  # init sound pointer in middle of anal window
-    pend = x.size - hM1  # last sample to start a frame
+    hM1, hM2 = dft.half_window_sizes(w.size)
+    x_padded = stft.pad_signal(x, hM2)
     w = w / sum(w)  # normalize analysis window
-    hfreqp = []  # initialize harmonic frequencies of previous frame
-    f0stable = 0  # initialize f0 stable
-    while pin <= pend:
-        x1 = x[pin - hM1:pin + hM2]  # select frame
-        mX, pX = dft.from_audio(x1, w, N)  # compute dft
-        ploc = peaks.find_peaks(mX, t)  # detect peak locations
-        iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values
-        ipfreq = fs * iploc / N  # convert locations to Hz
-        f0t = peaks.find_fundamental_twm(ipfreq, ipmag, f0et, minf0, maxf0, f0stable)  # find f0
-        if ((f0stable == 0) & (f0t > 0)) \
-                or ((f0stable > 0) & (np.abs(f0stable - f0t) < f0stable / 5.0)):
-            f0stable = f0t  # consider a stable f0 if it is close to the previous one
-        else:
-            f0stable = 0
-        hfreq, hmag, hphase = find_harmonics(ipfreq, ipmag, ipphase, f0t, nH, hfreqp, fs, harmDevSlope)  # find harmonics
-        hfreqp = hfreq
-        if pin == hM1:  # first frame
-            xhfreq = np.array([hfreq])
-            xhmag = np.array([hmag])
-            xhphase = np.array([hphase])
-        else:  # next frames
-            xhfreq = np.vstack((xhfreq, np.array([hfreq])))
-            xhmag = np.vstack((xhmag, np.array([hmag])))
-            xhphase = np.vstack((xhphase, np.array([hphase])))
-        pin += H  # advance sound pointer
-    xhfreq = sine.clean_sinusoid_tracks(xhfreq, round(fs * minSineDur / H))  # delete tracks shorter than minSineDur
+    hfreq_prev = []  # initialize harmonic frequencies of previous frame
+    f0_prev = 0  # initialize f0 stable
+    xhfreq, xhmag, xhphase = [], [], []
+    for x_frame in stft.iterate_analysis_frames(x_padded, H, hM1, hM2):
+        # find peaks
+        ipfreq, ipmag, ipphase = find_peaks(N, fs, t, w, x_frame)
+
+        # find fundamental frequency (f0)
+        f0_this = peaks.find_fundamental_twm(ipfreq, ipmag, f0et, minf0, maxf0, f0_prev)
+        f0_prev = f0_this if is_f0_stable(f0_this, f0_prev) else 0
+
+        # find harmonics
+        hfreq, hmag, hphase = find_harmonics(ipfreq, ipmag, ipphase, f0_this, nH, hfreq_prev, fs, harmDevSlope)
+        hfreq_prev = hfreq
+
+        # store the harmonics
+        xhfreq.append(hfreq)
+        xhmag.append(hmag)
+        xhphase.append(hphase)
+
+    xhfreq, xhmag, xhphase = [np.vstack(xh) for xh in (xhfreq, xhmag, xhphase)]
+
+    # delete tracks shorter than minSineDur
+    xhfreq = sine.clean_sinusoid_tracks(xhfreq, round(fs * minSineDur / H))
+
     return xhfreq, xhmag, xhphase
+
+
+# to_audio() is implemented in the sine model
 
 # transformations applied to the harmonics of a sound
 
 def scale_frequencies(hfreq, hmag, freqScaling, freqStretching, timbrePreservation, fs):
     """
-    Frequency scaling of the harmonics of a sound
-    hfreq, hmag: frequencies and magnitudes of input harmonics
-    freqScaling: scaling factors, in time-value pairs (value of 1 no scaling)
-    freqStretching: stretching factors, in time-value pairs (value of 1 no stretching)
-    timbrePreservation: 0  no timbre preservation, 1 timbre preservation
-    fs: sampling rate of input sound
-    returns yhfreq, yhmag: frequencies and magnitudes of output harmonics
+    Scales the frequencies of the harmonics of a sound.
+
+    :param hfreq: frequencies of input harmonics
+    :param hmag: magnitudes of input harmonics
+    :param freqScaling: scaling factors, in time-value pairs (value of 1 no scaling)
+    :param freqStretching: stretching factors, in time-value pairs (value of 1 no stretching)
+    :param timbrePreservation: 0  no timbre preservation, 1 timbre preservation
+    :param fs: sampling rate of input sound
+    :returns: yhfreq, yhmag: frequencies and magnitudes of output harmonics
     """
     if freqScaling.size % 2 != 0:  # raise exception if array not even length
         raise ValueError("Frequency scaling array does not have an even size")
@@ -105,14 +110,23 @@ def scale_frequencies(hfreq, hmag, freqScaling, freqStretching, timbrePreservati
 
 # -- supporting function --
 
+# TODO: this function is not used anywhere, should it be part of the API?
+# This just finds the track of the fundamental frequencies, from_audio()
+# in addition finds all the harmonics.
+
 def find_fundamental_freq(x, fs, w, N, H, t, minf0, maxf0, f0et):
     """
-    Fundamental frequency detection of a sound using twm algorithm
-    x: input sound; fs: sampling rate; w: analysis window;
-    N: FFT size; t: threshold in negative dB,
-    minf0: minimum f0 frequency in Hz, maxf0: maximim f0 frequency in Hz,
-    f0et: error threshold in the f0 detection (ex: 5),
-    returns f0: fundamental frequency
+    Finds fundamental frequencies of a sound using the TWM (Two-Way Mismatch) algorithm.
+
+    :param x: input sound
+    :param fs: sampling rate
+    :param w: analysis window
+    :param N: FFT size
+    :param t: threshold in negative dB
+    :param minf0: minimum f0 frequency in Hz
+    :param maxf0: maximum f0 frequency in Hz
+    :param f0et: error threshold in the f0 detection (ex: 5)
+    :returns: f0: fundamental frequency
     """
     if minf0 < 0:  # raise exception if minf0 is smaller than 0
         raise ValueError("Minumum fundamental frequency (minf0) smaller than 0")
@@ -124,41 +138,36 @@ def find_fundamental_freq(x, fs, w, N, H, t, minf0, maxf0, f0et):
     if H <= 0:  # raise error if hop size 0 or negative
         raise ValueError("Hop size (H) smaller or equal to 0")
 
-    hM1 = int(math.floor((w.size + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(w.size / 2))  # half analysis window size by floor
+    hM1, hM2 = dft.half_window_sizes(w.size)
     x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(hM1))  # add zeros at the end to analyze last sample
-    pin = hM1  # init sound pointer in middle of anal window
-    pend = x.size - hM1  # last sample to start a frame
     w = w / sum(w)  # normalize analysis window
-    f0 = []  # initialize f0 output
-    f0stable = 0  # initialize f0 stable
-    while pin < pend:
-        x1 = x[pin - hM1:pin + hM2]  # select frame
-        mX, pX = dft.from_audio(x1, w, N)  # compute dft
-        ploc = peaks.find_peaks(mX, t)  # detect peak locations
-        iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values
-        ipfreq = fs * iploc / N  # convert locations to Hez
-        f0t = peaks.find_fundamental_twm(ipfreq, ipmag, f0et, minf0, maxf0, f0stable)  # find f0
-        if ((f0stable == 0) & (f0t > 0)) \
-                or ((f0stable > 0) & (np.abs(f0stable - f0t) < f0stable / 5.0)):
-            f0stable = f0t  # consider a stable f0 if it is close to the previous one
-        else:
-            f0stable = 0
-        f0 = np.append(f0, f0t)  # add f0 to output array
-        pin += H  # advance sound pointer
-    return f0
+    fundamental_freqs = []  # initialize f0 output
+    f0_prev = 0  # initialize f0 stable
+    for x_frame in stft.iterate_analysis_frames(x, H, hM1, hM2):
+        # find peaks
+        ipfreq, ipmag, ipphase = find_peaks(N, fs, t, w, x_frame)
+        # find fundamental frequency
+        f0_this = peaks.find_fundamental_twm(ipfreq, ipmag, f0et, minf0, maxf0, f0_prev)
+        f0_prev = f0_this if is_f0_stable(f0_this, f0_prev) else 0
+        fundamental_freqs = np.append(fundamental_freqs, f0_this)
+    return fundamental_freqs
 
 
 def find_harmonics(pfreq, pmag, pphase, f0, nH, hfreqp, fs, harmDevSlope=0.01):
     """
-    Detection of the harmonics of a frame from a set of spectral peaks using f0
-    to the ideal harmonic series built on top of a fundamental frequency
-    pfreq, pmag, pphase: peak frequencies, magnitudes and phases
-    f0: fundamental frequency, nH: number of harmonics,
-    hfreqp: harmonic frequencies of previous frame,
-    fs: sampling rate; harmDevSlope: slope of change of the deviation allowed to perfect harmonic
-    returns hfreq, hmag, hphase: harmonic frequencies, magnitudes, phases
+    Finds harmonics of a frame from a set of spectral peaks using f0
+    to the ideal harmonic series built on top of a fundamental frequency.
+
+    :param pfreq: peak frequencies
+    :param pmag: peak magnitudes
+    :param pphase: peak phases
+    :param f0: fundamental frequency
+    :param nH: number of harmonics
+    :param hfreqp: harmonic frequencies of previous frame
+    :param fs: sampling rate
+    :param harmDevSlope: slope of change of the deviation allowed to perfect harmonic
+    :returns: hfreq, hmag, hphase: harmonic frequencies, magnitudes, phases
     """
 
     if f0 <= 0:  # if no f0 return no harmonics
@@ -181,3 +190,24 @@ def find_harmonics(pfreq, pmag, pphase, f0, nH, hfreqp, fs, harmDevSlope=0.01):
             hphase[hi] = pphase[pei]  # harmonic phases
         hi += 1  # increase harmonic index
     return hfreq, hmag, hphase
+
+
+def find_peaks(N, fs, t, w, x_frame):
+    # compute dft
+    mX, pX = dft.from_audio(x_frame, w, N)
+    # detect peak locations
+    ploc = peaks.find_peaks(mX, t)
+    iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values
+    ipfreq = fs * iploc / N  # convert locations to Hz
+    return ipfreq, ipmag, ipphase
+
+
+def is_f0_stable(f0, f0_prev):
+    """
+    Indicates whether a fundamental frequency in this frame is stable
+    (if it does not deviate much from the previous one).
+
+    :param f0: fundamental frequency in this frame (0 if not stable)
+    :param f0_prev: fundamental frequency in previous frame (0 if not stable)
+    """
+    return ((f0_prev == 0) & (f0 > 0)) or ((f0_prev > 0) & (np.abs(f0_prev - f0) < f0_prev / 5.0))

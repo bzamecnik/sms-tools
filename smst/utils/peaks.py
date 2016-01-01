@@ -1,13 +1,15 @@
 import numpy as np
 
 from .utilFunctions_C import utilFunctions_C as UF_C
-
+from .math import from_db_magnitudes
 
 def find_peaks(mX, t):
     """
-    Detect spectral peak locations
-    mX: magnitude spectrum, t: threshold
-    returns ploc: peak locations
+    Detects spectral peak locations.
+
+    :param mX: magnitude spectrum
+    :param t: threshold
+    :returns: ploc: peak locations
     """
 
     thresh = np.where(mX[1:-1] > t, mX[1:-1], 0)  # locations above threshold
@@ -20,9 +22,12 @@ def find_peaks(mX, t):
 
 def interpolate_peaks(mX, pX, ploc):
     """
-    Interpolate peak values using parabolic interpolation
-    mX, pX: magnitude and phase spectrum, ploc: locations of peaks
-    returns iploc, ipmag, ipphase: interpolated peak location, magnitude and phase values
+    Interpolates peak values using parabolic interpolation.
+
+    :param mX: magnitude spectrum
+    :param pX: phase spectrum
+    :param ploc: locations of peaks
+    :returns: iploc, ipmag, ipphase: interpolated peak location, magnitude and phase values
     """
 
     val = mX[ploc]  # magnitude of peak bin
@@ -37,11 +42,15 @@ def interpolate_peaks(mX, pX, ploc):
 def find_fundamental_twm(pfreq, pmag, ef0max, minf0, maxf0, f0t=0):
     """
     Function that wraps the f0 detection function TWM, selecting the possible f0 candidates
-    and calling the function TWM with them
-    pfreq, pmag: peak frequencies and magnitudes,
-    ef0max: maximum error allowed, minf0, maxf0: minimum  and maximum f0
-    f0t: f0 of previous frame if stable
-    returns f0: fundamental frequency in Hz
+    and calling the function TWM with them.
+
+    :param pfreq: peak frequencies
+    :param pmag: peak magnitudes
+    :param ef0max: maximum error allowed
+    :param minf0: minimum allowed f0
+    :param maxf0: maximum allowed f0
+    :param f0t: f0 of previous frame if stable
+    :returns: f0: fundamental frequency in Hz
     """
     if minf0 < 0:  # raise exception if minf0 is smaller than 0
         raise ValueError("Minumum fundamental frequency (minf0) smaller than 0")
@@ -81,11 +90,13 @@ def find_fundamental_twm(pfreq, pmag, ef0max, minf0, maxf0, f0t=0):
 
 def find_fundamental_twm_py(pfreq, pmag, f0c):
     """
-    Two-way mismatch algorithm for f0 detection (by Beauchamp&Maher)
-    [better to use the C version of this function: UF_C.twm]
-    pfreq, pmag: peak frequencies in Hz and magnitudes,
-    f0c: frequencies of f0 candidates
-    returns f0, f0Error: fundamental frequency detected and its error
+    Two-way mismatch algorithm for f0 detection (by Beauchamp&Maher).
+    Better to use the C version of this function: UF_C.twm().
+
+    :param pfreq: peak frequencies in Hz
+    :param pmag: peak magnitudes
+    :param f0c: frequencies of f0 candidates
+    :returns: f0, f0Error: fundamental frequency detected and its error
     """
 
     p = 0.5  # weighting by frequency value
@@ -104,7 +115,7 @@ def find_fundamental_twm_py(pfreq, pmag, f0c):
         peakloc = np.argmin(difmatrixPM, axis=1)
         Ponddif = np.array(FreqDistance) * (np.array(harmonic.T) ** (-p))
         PeakMag = pmag[peakloc]
-        MagFactor = 10 ** ((PeakMag - Amax) / 20)
+        MagFactor = from_db_magnitudes(PeakMag - Amax)
         ErrorPM = ErrorPM + (Ponddif + MagFactor * (q * Ponddif - r)).T
         harmonic += f0c
 
@@ -116,7 +127,7 @@ def find_fundamental_twm_py(pfreq, pmag, f0c):
         FreqDistance = abs(pfreq[:MaxNMP] - nharm * f0c[i])
         Ponddif = FreqDistance * (pfreq[:MaxNMP] ** (-p))
         PeakMag = pmag[:MaxNMP]
-        MagFactor = 10 ** ((PeakMag - Amax) / 20)
+        MagFactor = from_db_magnitudes(PeakMag - Amax)
         ErrorMP[i] = sum(MagFactor * (Ponddif + MagFactor * (q * Ponddif - r)))
 
     Error = (ErrorPM[0] / MaxNPM) + (rho * ErrorMP / MaxNMP)  # total error
@@ -128,9 +139,11 @@ def find_fundamental_twm_py(pfreq, pmag, f0c):
 
 def clean_sinusoid_track(track, minTrackLength=3):
     """
-    Delete fragments of one single track smaller than minTrackLength
-    track: array of values; minTrackLength: minimum duration of tracks in number of frames
-    returns cleanTrack: array of clean values
+    Deletes fragments of one single track smaller than minTrackLength.
+
+    :param track: array of values
+    :param minTrackLength: minimum duration of tracks in number of frames
+    :returns: cleanTrack: array of clean values
     """
 
     nFrames = track.size  # number of frames

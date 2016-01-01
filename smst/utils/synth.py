@@ -2,14 +2,18 @@ import numpy as np
 
 from .window import blackman_harris_lobe
 from .utilFunctions_C import utilFunctions_C as UF_C
-
+from .math import from_db_magnitudes
 
 def spectrum_for_sinusoids(ipfreq, ipmag, ipphase, N, fs):
     """
-    Generate a spectrum from a series of sine values, calling a C function
-    ipfreq, ipmag, ipphase: sine peaks frequencies, magnitudes and phases
-    N: size of the complex spectrum to generate; fs: sampling frequency
-    returns Y: generated complex spectrum of sines
+    Generates a spectrum from a series of sine values, calling a C function.
+
+    :param ipfreq: sine peaks frequencies
+    :param ipmag: sine peaks magnitudes
+    :param ipphase: sine peaks phases
+    :param N: size of the complex spectrum to generate
+    :param fs: sampling frequency
+    :returns: Y: generated complex spectrum of sines
     """
 
     Y = UF_C.genSpecSines(N * ipfreq / float(fs), ipmag, ipphase, N)
@@ -18,10 +22,14 @@ def spectrum_for_sinusoids(ipfreq, ipmag, ipphase, N, fs):
 
 def spectrum_for_sinusoids_py(ipfreq, ipmag, ipphase, N, fs):
     """
-    Generate a spectrum from a series of sine values
-    iploc, ipmag, ipphase: sine peaks locations, magnitudes and phases
-    N: size of the complex spectrum to generate; fs: sampling rate
-    returns Y: generated complex spectrum of sines
+    Generates a spectrum from a series of sine values. Python implementation.
+
+    :param ipfreq: sine peaks frequencies
+    :param ipmag: sine peaks magnitudes
+    :param ipphase: sine peaks phases
+    :param N: size of the complex spectrum to generate
+    :param fs: sampling frequency
+    :returns: Y: generated complex spectrum of sines
     """
 
     Y = np.zeros(N, dtype=complex)  # initialize output complex spectrum
@@ -32,7 +40,7 @@ def spectrum_for_sinusoids_py(ipfreq, ipmag, ipphase, N, fs):
             continue
         binremainder = round(loc) - loc
         lb = np.arange(binremainder - 4, binremainder + 5)  # main lobe (real value) bins to read
-        lmag = blackman_harris_lobe(lb) * 10 ** (ipmag[i] / 20)  # lobe magnitudes of the complex exponential
+        lmag = blackman_harris_lobe(lb) * from_db_magnitudes(ipmag[i])  # lobe magnitudes of the complex exponential
         b = np.arange(round(loc) - 4, round(loc) + 5)
         for m in range(0, 9):
             if b[m] < 0:  # peak lobe crosses DC bin
@@ -49,10 +57,13 @@ def spectrum_for_sinusoids_py(ipfreq, ipmag, ipphase, N, fs):
 
 def synthesize_sinusoid(freqs, amp, H, fs):
     """
-    Synthesis of one sinusoid with time-varying frequency
-    freqs, amps: array of frequencies and amplitudes of sinusoids
-    H: hop size, fs: sampling rate
-    returns y: output array sound
+    Synthesizes one sinusoid with time-varying frequency.
+
+    :param freqs: frequencies of sinusoids
+    :param amps: amplitudes of sinusoids
+    :param H: hop size
+    :param fs: sampling rate
+    :returns: y: output sound
     """
 
     t = np.arange(H) / float(fs)  # time array

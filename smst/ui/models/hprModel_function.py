@@ -47,9 +47,11 @@ def main(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman', M
     y, yh = hpr.to_audio(hfreq, hmag, hphase, xr, Ns, H, fs)
 
     # output sound file (monophonic with sampling rate of 44100)
-    outputFileSines = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_hprModel_sines.wav'
-    outputFileResidual = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_hprModel_residual.wav'
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_hprModel.wav'
+    baseFileName = files.strip_file(inputFile)
+    outputFileSines, outputFileResidual, outputFile = [
+        'output_sounds/%s_hprModel%s.wav' % (baseFileName, i)
+        for i in ('_sines', '_residual', '')
+    ]
 
     # write sounds files for harmonics, residual, and the sum
     audio.write_wav(yh, fs, outputFileSines)
@@ -73,7 +75,7 @@ def main(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman', M
     # plot the magnitude spectrogram of residual
     plt.subplot(3, 1, 2)
     maxplotbin = int(N * maxplotfreq / fs)
-    numFrames = int(mXr[:, 0].size)
+    numFrames = int(mXr.shape[0])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = np.arange(maxplotbin + 1) * float(fs) / N
     plt.pcolormesh(frmTime, binFreq, np.transpose(mXr[:, :maxplotbin + 1]))
@@ -83,7 +85,7 @@ def main(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman', M
     if (hfreq.shape[1] > 0):
         harms = hfreq * np.less(hfreq, maxplotfreq)
         harms[harms == 0] = np.nan
-        numFrames = int(harms[:, 0].size)
+        numFrames = int(harms.shape[0])
         frmTime = H * np.arange(numFrames) / float(fs)
         plt.plot(frmTime, harms, color='k', ms=3, alpha=1)
         plt.xlabel('time(s)')

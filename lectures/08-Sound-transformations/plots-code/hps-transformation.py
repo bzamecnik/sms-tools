@@ -50,8 +50,8 @@ plt.title('x (sax-phrase-short.wav')
 
 # plot spectrogram stochastic compoment
 plt.subplot(4, 1, 2)
-numFrames = int(mYst[:, 0].size)
-sizeEnv = int(mYst[0, :].size)
+numFrames = int(mYst.shape[0])
+sizeEnv = int(mYst.shape[1])
 frmTime = H * np.arange(numFrames) / float(fs)
 binFreq = (.5 * fs) * np.arange(sizeEnv * maxplotfreq / (.5 * fs)) / sizeEnv
 plt.pcolormesh(frmTime, binFreq, np.transpose(mYst[:, :sizeEnv * maxplotfreq / (.5 * fs) + 1]))
@@ -60,7 +60,7 @@ plt.autoscale(tight=True)
 # plot harmonic on top of stochastic spectrogram
 harms = hfreq * np.less(hfreq, maxplotfreq)
 harms[harms == 0] = np.nan
-numFrames = int(harms[:, 0].size)
+numFrames = int(harms.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 plt.plot(frmTime, harms, color='k', ms=3, alpha=1)
 plt.autoscale(tight=True)
@@ -69,8 +69,8 @@ plt.title('harmonics + stochastic residual')
 
 # plot spectrogram of transformed stochastic compoment
 plt.subplot(4, 1, 3)
-numFrames = int(ystocEnv[:, 0].size)
-sizeEnv = int(ystocEnv[0, :].size)
+numFrames = int(ystocEnv.shape[0])
+sizeEnv = int(ystocEnv.shape[1])
 frmTime = H * np.arange(numFrames) / float(fs)
 binFreq = (.5 * fs) * np.arange(sizeEnv * maxplotfreq / (.5 * fs)) / sizeEnv
 plt.pcolormesh(frmTime, binFreq, np.transpose(ystocEnv[:, :sizeEnv * maxplotfreq / (.5 * fs) + 1]))
@@ -79,7 +79,7 @@ plt.autoscale(tight=True)
 # plot transformed harmonic on top of stochastic spectrogram
 harms = yhfreq * np.less(yhfreq, maxplotfreq)
 harms[harms == 0] = np.nan
-numFrames = int(harms[:, 0].size)
+numFrames = int(harms.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 plt.plot(frmTime, harms, color='k', ms=3, alpha=1)
 plt.autoscale(tight=True)

@@ -1,5 +1,8 @@
-# functions that implement analysis and synthesis of sounds using the Short-Time Fourier Transform
-# (for example usage check stft_function.py in the models_interface directory)
+"""
+Functions that implement analysis and synthesis of sounds using the Short-Time Fourier Transform.
+
+For example usage check the stftModel_function module.
+"""
 
 import math
 
@@ -11,43 +14,42 @@ from . import dft
 
 def from_audio(x, w, N, H):
     """
-    Analysis of a sound using the short-time Fourier transform
-    x: input array sound, w: analysis window, N: FFT size, H: hop size
-    returns xmX, xpX: magnitude and phase spectra
+    Analyzes an input signal using the short-time Fourier transform into
+    a spectrogram.
+
+    :param x: input signal
+    :param w: analysis window
+    :param N: FFT size
+    :param H: hop size
+    :returns: mag_spectrogram, phase_spectrogram - magnitude and phase spectrograms
     """
-    if (H <= 0):  # raise error if hop size 0 or negative
+    if H <= 0:
         raise ValueError("Hop size (H) smaller or equal to 0")
 
-    M = w.size  # size of analysis window
-    hM1 = int(math.floor((M + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(M / 2))  # half analysis window size by floor
-    x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
-    x = np.append(x, np.zeros(hM2))  # add zeros at the end to analyze last sample
-    pin = hM1  # initialize sound pointer in middle of analysis window
-    pend = x.size - hM1  # last sample to start a frame
+    hM1, hM2 = dft.half_window_sizes(w.size)
+    x_padded = pad_signal(x, hM2)
     w = w / sum(w)  # normalize analysis window
-    while pin <= pend:  # while sound pointer is smaller than last sample
-        x1 = x[pin - hM1:pin + hM2]  # select one frame of input sound
-        mX, pX = dft.from_audio(x1, w, N)  # compute dft
-        if pin == hM1:  # if first frame create output arrays
-            xmX = np.array([mX])
-            xpX = np.array([pX])
-        else:  # append output to existing array
-            xmX = np.vstack((xmX, np.array([mX])))
-            xpX = np.vstack((xpX, np.array([pX])))
-        pin += H  # advance sound pointer
-    return xmX, xpX
+    mag_spectrogram, phase_spectrogram = [], []
+    for x_frame in iterate_analysis_frames(x_padded, H, hM1, hM2):
+        mag_spectrum, phase_spectrum = dft.from_audio(x_frame, w, N)
+        mag_spectrogram.append(mag_spectrum)
+        phase_spectrogram.append(phase_spectrum)
+    return np.vstack(mag_spectrogram), np.vstack(phase_spectrogram)
 
 
 def to_audio(mY, pY, M, H):
     """
-    Synthesis of a sound using the short-time Fourier transform
-    mY: magnitude spectra, pY: phase spectra, M: window size, H: hop-size
-    returns y: output sound
+    Synthesizes an output signal from a spectrogram using the
+    inverse short-time Fourier transform.
+
+    :param mY: magnitude spectrogram
+    :param pY: phase spectrogram
+    :param M: window size
+    :param H: hop-size
+    :returns: y - output signal
     """
-    hM1 = int(math.floor((M + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(M / 2))  # half analysis window size by floor
-    nFrames = mY[:, 0].size  # number of frames
+    hM1, hM2 = dft.half_window_sizes(M)
+    nFrames = mY.shape[0]  # number of frames
     y = np.zeros(nFrames * H + hM1 + hM2)  # initialize output array
     pin = hM1
     for i in range(nFrames):  # iterate over all frames
@@ -64,25 +66,28 @@ def to_audio(mY, pY, M, H):
 
 def filter(x, fs, w, N, H, filter):
     """
-    Apply a filter to a sound by using the STFT
-    x: input sound, w: analysis window, N: FFT size, H: hop size
-    filter: magnitude response of filter with frequency-magnitude pairs (in dB)
-    returns y: output sound
+    Applies a spectral filter to a sound by using the STFT.
+
+    :param x: input sound
+    :param w: analysis window
+    :param N: FFT size
+    :param H: hop size
+    :param filter: magnitude response of filter with frequency-magnitude pairs (in dB)
+    :returns: y - output sound
     """
 
     M = w.size  # size of analysis window
-    hM1 = int(math.floor((M + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(M / 2))  # half analysis window size by floor
+    hM1, hM2 = dft.half_window_sizes(M)
     x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(hM1))  # add zeros at the end to analyze last sample
     pin = hM1  # initialize sound pointer in middle of analysis window
     pend = x.size - hM1  # last sample to start a frame
     w = w / sum(w)  # normalize analysis window
     y = np.zeros(x.size)  # initialize output array
-    while pin <= pend:  # while sound pointer is smaller than last sample
+    while pin < pend:  # while sound pointer is smaller than last sample
         # -----analysis-----
-        x1 = x[pin - hM1:pin + hM2]  # select one frame of input sound
-        mX, pX = dft.from_audio(x1, w, N)  # compute DFT
+        x_frame = x[pin - hM1:pin + hM2]  # select one frame of input sound
+        mX, pX = dft.from_audio(x_frame, w, N)  # compute DFT
         # ------transformation-----
         mY = mX + filter  # filter input magnitude spectrum
         # -----synthesis-----
@@ -96,12 +101,16 @@ def filter(x, fs, w, N, H, filter):
 
 def morph(x1, x2, fs, w1, N1, w2, N2, H1, smoothf, balancef):
     """
-    Morph of two sounds using the STFT
-    x1, x2: input sounds, fs: sampling rate
-    w1, w2: analysis windows, N1, N2: FFT sizes, H1: hop size
-    smoothf: smooth factor of sound 2, bigger than 0 to max of 1, where 1 is no smoothing,
-    balancef: balance between the 2 sounds, from 0 to 1, where 0 is sound 1 and 1 is sound 2
-    returns y: output sound
+    Morphs two sounds using the STFT.
+
+    :param x1, x2: input sounds
+    :param fs: sampling rate
+    :param w1, w2: analysis windows
+    :param N1, N2: FFT sizes
+    :param H1: hop size
+    :param smoothf: smooth factor of sound 2, bigger than 0 to max of 1, where 1 is no smoothing,
+    :param balancef: balance between the 2 sounds, from 0 to 1, where 0 is sound 1 and 1 is sound 2
+    :returns: y: output sound
     """
 
     if N2 / 2 * smoothf < 3:  # raise exception if decimation factor too small
@@ -147,3 +156,26 @@ def morph(x1, x2, fs, w1, N1, w2, N2, H1, smoothf, balancef):
     y = np.delete(y, range(hM1_2))  # delete half of first window
     y = np.delete(y, range(y.size - hM1_1, y.size))  # add zeros at the end to analyze last sample
     return y
+
+def pad_signal(x, hM2):
+    x_padded = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
+    x_padded = np.append(x_padded, np.zeros(hM2))  # add zeros at the end to analyze last sample
+    return x_padded
+
+def iterate_analysis_frames(x, H, hM1, hM2):
+    """
+    Iterate over frames of input signal for analysis.
+
+    :param x: input signal
+    :param H: hop size
+    :param hM1: half analysis window size by rounding
+    :param hM2: half analysis window size by floor
+    :return: generator over frames of input signal
+    """
+    pin = hM1  # initialize sound pointer in middle of analysis window
+    pend = x.size - hM1  # last sample to start a frame
+    while pin < pend:  # while sound pointer is smaller than last sample
+        frame_start = pin - hM1
+        frame_end = pin + hM2
+        yield x[frame_start:frame_end]  # select one frame of input sound
+        pin += H  # advance sound pointer

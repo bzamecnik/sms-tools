@@ -7,6 +7,7 @@ import tkMessageBox
 
 from . import stochasticModel_function
 from smst.utils import audio
+from smst.utils.files import strip_file
 
 
 class StochasticModelFrame:
@@ -74,7 +75,7 @@ class StochasticModelFrame:
         output_label = "Stochastic:"
         Label(self.parent, text=output_label).grid(row=6, column=0, sticky=W, padx=5, pady=(10, 15))
         self.output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + os.path.basename(self.filelocation.get())[:-4] + '_stochasticModel.wav'), bg="gray30",
+            'output_sounds/' + strip_file(self.filelocation.get()) + '_stochasticModel.wav'), bg="gray30",
                              fg="white")
         self.output.grid(row=6, column=0, padx=(80, 5), pady=(10, 15), sticky=W)
 

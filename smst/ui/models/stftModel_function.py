@@ -9,6 +9,7 @@ from scipy.signal import get_window
 from smst.utils import audio, files
 from smst.models import stft
 from .. import demo_sound_path
+from smst.utils.files import strip_file
 
 
 def main(inputFile=demo_sound_path('piano.wav'), window='hamming', M=1024, N=1024, H=512,
@@ -35,7 +36,7 @@ def main(inputFile=demo_sound_path('piano.wav'), window='hamming', M=1024, N=102
     y = stft.to_audio(mX, pX, M, H)
 
     # output sound file (monophonic with sampling rate of 44100)
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_stft.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_stft.wav'
 
     # write the sound resulting from the inverse stft
     audio.write_wav(y, fs, outputFile)
@@ -56,7 +57,7 @@ def main(inputFile=demo_sound_path('piano.wav'), window='hamming', M=1024, N=102
 
     # plot magnitude spectrogram
     plt.subplot(4, 1, 2)
-    numFrames = int(mX[:, 0].size)
+    numFrames = int(mX.shape[0])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = fs * np.arange(N * maxplotfreq / fs) / N
     plt.pcolormesh(frmTime, binFreq, np.transpose(mX[:, :N * maxplotfreq / fs + 1]))
@@ -67,7 +68,7 @@ def main(inputFile=demo_sound_path('piano.wav'), window='hamming', M=1024, N=102
 
     # plot the phase spectrogram
     plt.subplot(4, 1, 3)
-    numFrames = int(pX[:, 0].size)
+    numFrames = int(pX.shape[0])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = fs * np.arange(N * maxplotfreq / fs) / N
     plt.pcolormesh(frmTime, binFreq, np.transpose(np.diff(pX[:, :N * maxplotfreq / fs + 1], axis=1)))

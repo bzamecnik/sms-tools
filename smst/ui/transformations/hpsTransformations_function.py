@@ -9,6 +9,7 @@ from scipy.signal import get_window
 from smst.utils import audio, files
 from smst.models import harmonic, hps
 from .. import demo_sound_path
+from smst.utils.files import strip_file
 
 
 def analysis(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman', M=601, N=1024, t=-100,
@@ -52,7 +53,7 @@ def analysis(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman
     y, yh, yst = hps.to_audio(hfreq, hmag, np.array([]), mYst, Ns, H, fs)
 
     # write output sound
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_hpsModel.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_hpsModel.wav'
     audio.write_wav(y, fs, outputFile)
 
     # create figure to plot
@@ -71,8 +72,8 @@ def analysis(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman
 
     # plot spectrogram stochastic compoment
     plt.subplot(3, 1, 2)
-    numFrames = int(mYst[:, 0].size)
-    sizeEnv = int(mYst[0, :].size)
+    numFrames = int(mYst.shape[0])
+    sizeEnv = int(mYst.shape[1])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = (.5 * fs) * np.arange(sizeEnv * maxplotfreq / (.5 * fs)) / sizeEnv
     plt.pcolormesh(frmTime, binFreq, np.transpose(mYst[:, :sizeEnv * maxplotfreq / (.5 * fs) + 1]))
@@ -82,7 +83,7 @@ def analysis(inputFile=demo_sound_path('sax-phrase-short.wav'), window='blackman
     if (hfreq.shape[1] > 0):
         harms = hfreq * np.less(hfreq, maxplotfreq)
         harms[harms == 0] = np.nan
-        numFrames = int(harms[:, 0].size)
+        numFrames = int(harms.shape[0])
         frmTime = H * np.arange(numFrames) / float(fs)
         plt.plot(frmTime, harms, color='k', ms=3, alpha=1)
         plt.xlabel('time (sec)')
@@ -141,7 +142,7 @@ def transformation_synthesis(inputFile, fs, hfreq, hmag, mYst,
     y, yh, yst = hps.to_audio(yhfreq, yhmag, np.array([]), ystocEnv, Ns, H, fs)
 
     # write output sound
-    outputFile = 'output_sounds/' + os.path.basename(inputFile)[:-4] + '_hpsModelTransformation.wav'
+    outputFile = 'output_sounds/' + strip_file(inputFile) + '_hpsModelTransformation.wav'
     audio.write_wav(y, fs, outputFile)
 
     # create figure to plot
@@ -152,8 +153,8 @@ def transformation_synthesis(inputFile, fs, hfreq, hmag, mYst,
 
     # plot spectrogram of transformed stochastic compoment
     plt.subplot(2, 1, 1)
-    numFrames = int(ystocEnv[:, 0].size)
-    sizeEnv = int(ystocEnv[0, :].size)
+    numFrames = int(ystocEnv.shape[0])
+    sizeEnv = int(ystocEnv.shape[1])
     frmTime = H * np.arange(numFrames) / float(fs)
     binFreq = (.5 * fs) * np.arange(sizeEnv * maxplotfreq / (.5 * fs)) / sizeEnv
     plt.pcolormesh(frmTime, binFreq, np.transpose(ystocEnv[:, :sizeEnv * maxplotfreq / (.5 * fs) + 1]))
@@ -163,7 +164,7 @@ def transformation_synthesis(inputFile, fs, hfreq, hmag, mYst,
     if (yhfreq.shape[1] > 0):
         harms = yhfreq * np.less(yhfreq, maxplotfreq)
         harms[harms == 0] = np.nan
-        numFrames = int(harms[:, 0].size)
+        numFrames = int(harms.shape[0])
         frmTime = H * np.arange(numFrames) / float(fs)
         plt.plot(frmTime, harms, color='k', ms=3, alpha=1)
         plt.xlabel('time (sec)')

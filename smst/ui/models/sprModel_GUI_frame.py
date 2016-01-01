@@ -7,6 +7,7 @@ import tkMessageBox
 
 from . import sprModel_function
 from smst.utils import audio
+from smst.utils.files import strip_file
 
 
 class SprModelFrame:
@@ -119,7 +120,7 @@ class SprModelFrame:
         output_label = "Sinusoidal:"
         Label(self.parent, text=output_label).grid(row=11, column=0, sticky=W, padx=5, pady=(10, 0))
         self.output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + os.path.basename(self.filelocation.get())[:-4] + '_sprModel_sines.wav'), bg="gray30",
+            'output_sounds/' + strip_file(self.filelocation.get()) + '_sprModel_sines.wav'), bg="gray30",
                              fg="white")
         self.output.grid(row=11, column=0, padx=(80, 5), pady=(10, 0), sticky=W)
 
@@ -127,7 +128,7 @@ class SprModelFrame:
         output_label = "Residual:"
         Label(self.parent, text=output_label).grid(row=12, column=0, sticky=W, padx=5, pady=(5, 0))
         self.output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + os.path.basename(self.filelocation.get())[:-4] + '_sprModel_residual.wav'), bg="gray30",
+            'output_sounds/' + strip_file(self.filelocation.get()) + '_sprModel_residual.wav'), bg="gray30",
                              fg="white")
         self.output.grid(row=12, column=0, padx=(80, 5), pady=(5, 0), sticky=W)
 
@@ -135,7 +136,7 @@ class SprModelFrame:
         output_label = "Output:"
         Label(self.parent, text=output_label).grid(row=13, column=0, sticky=W, padx=5, pady=(5, 15))
         self.output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + os.path.basename(self.filelocation.get())[:-4] + '_sprModel.wav'), bg="gray30",
+            'output_sounds/' + strip_file(self.filelocation.get()) + '_sprModel.wav'), bg="gray30",
                              fg="white")
         self.output.grid(row=13, column=0, padx=(80, 5), pady=(5, 15), sticky=W)
 

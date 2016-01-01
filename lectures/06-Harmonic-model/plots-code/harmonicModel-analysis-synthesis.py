@@ -23,7 +23,7 @@ harmDevSlope = 0.01
 hfreq, hmag, hphase = harmonic.from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope, minSineDur)
 y = sine.to_audio(hfreq, hmag, hphase, Ns, H, fs)
 
-numFrames = int(hfreq[:, 0].size)
+numFrames = int(hfreq.shape[0])
 frmTime = H * np.arange(numFrames) / float(fs)
 
 plt.figure(1, figsize=(9, 7))

@@ -24,7 +24,7 @@ sfreq, smag, sphase = sine.from_audio(x1, fs, w, N, H, t, maxnSines, minSineDur,
 timeScale = np.array(
     [.01, .0, .03, .03, .335, .8, .355, .82, .671, 1.0, .691, 1.02, .858, 1.1, .878, 1.12, 1.185, 1.8, 1.205, 1.82,
      1.49, 2.0])
-L = sfreq[:, 0].size  # number of input frames
+L = sfreq.shape[0]  # number of input frames
 maxInTime = max(timeScale[::2])  # maximum value used as input times
 maxOutTime = max(timeScale[1::2])  # maximum value used in output times
 outL = int(L * maxOutTime / maxInTime)  # number of output frames
