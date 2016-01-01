@@ -20,7 +20,10 @@ install:
   - conda info -a
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib cython pytest
   - source activate test-environment
+  - pip --version
   - pip install .
+  - pip show -f smst
+  - ls smst/utils/utilFunctions_C/
 # command to run tests
 script:
   # some self-contained regression tests
