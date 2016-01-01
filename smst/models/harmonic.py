@@ -34,27 +34,18 @@ def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, min
     x_padded = stft.pad_signal(x, hM2)
     w = w / sum(w)  # normalize analysis window
     hfreq_prev = []  # initialize harmonic frequencies of previous frame
-    f0stable = 0  # initialize f0 stable
+    f0_prev = 0  # initialize f0 stable
     xhfreq, xhmag, xhphase = [], [], []
     for x_frame in stft.iterate_analysis_frames(x_padded, H, hM1, hM2):
-        # compute dft
-        mX, pX = dft.from_audio(x_frame, w, N)
-
-        # detect peak locations
-        ploc = peaks.find_peaks(mX, t)
-        iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values
-        ipfreq = fs * iploc / N  # convert locations to Hz
+        # find peaks
+        ipfreq, ipmag, ipphase = find_peaks(N, fs, t, w, x_frame)
 
         # find fundamental frequency (f0)
-        f0t = peaks.find_fundamental_twm(ipfreq, ipmag, f0et, minf0, maxf0, f0stable)
-        if ((f0stable == 0) & (f0t > 0)) \
-                or ((f0stable > 0) & (np.abs(f0stable - f0t) < f0stable / 5.0)):
-            f0stable = f0t  # consider a stable f0 if it is close to the previous one
-        else:
-            f0stable = 0
+        f0_this = peaks.find_fundamental_twm(ipfreq, ipmag, f0et, minf0, maxf0, f0_prev)
+        f0_prev = f0_this if is_f0_stable(f0_this, f0_prev) else 0
 
         # find harmonics
-        hfreq, hmag, hphase = find_harmonics(ipfreq, ipmag, ipphase, f0t, nH, hfreq_prev, fs, harmDevSlope)
+        hfreq, hmag, hphase = find_harmonics(ipfreq, ipmag, ipphase, f0_this, nH, hfreq_prev, fs, harmDevSlope)
         hfreq_prev = hfreq
 
         # store the harmonics
@@ -68,6 +59,7 @@ def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, min
     xhfreq = sine.clean_sinusoid_tracks(xhfreq, round(fs * minSineDur / H))
 
     return xhfreq, xhmag, xhphase
+
 
 # to_audio() is implemented in the sine model
 
@@ -119,6 +111,8 @@ def scale_frequencies(hfreq, hmag, freqScaling, freqStretching, timbrePreservati
 # -- supporting function --
 
 # TODO: this function is not used anywhere, should it be part of the API?
+# This just finds the track of the fundamental frequencies, from_audio()
+# in addition finds all the harmonics.
 
 def find_fundamental_freq(x, fs, w, N, H, t, minf0, maxf0, f0et):
     """
@@ -148,21 +142,16 @@ def find_fundamental_freq(x, fs, w, N, H, t, minf0, maxf0, f0et):
     x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
     x = np.append(x, np.zeros(hM1))  # add zeros at the end to analyze last sample
     w = w / sum(w)  # normalize analysis window
-    f0 = []  # initialize f0 output
-    f0stable = 0  # initialize f0 stable
+    fundamental_freqs = []  # initialize f0 output
+    f0_prev = 0  # initialize f0 stable
     for x_frame in stft.iterate_analysis_frames(x, H, hM1, hM2):
-        mX, pX = dft.from_audio(x_frame, w, N)  # compute dft
-        ploc = peaks.find_peaks(mX, t)  # detect peak locations
-        iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values
-        ipfreq = fs * iploc / N  # convert locations to Hez
-        f0t = peaks.find_fundamental_twm(ipfreq, ipmag, f0et, minf0, maxf0, f0stable)  # find f0
-        if ((f0stable == 0) & (f0t > 0)) \
-                or ((f0stable > 0) & (np.abs(f0stable - f0t) < f0stable / 5.0)):
-            f0stable = f0t  # consider a stable f0 if it is close to the previous one
-        else:
-            f0stable = 0
-        f0 = np.append(f0, f0t)  # add f0 to output array
-    return f0
+        # find peaks
+        ipfreq, ipmag, ipphase = find_peaks(N, fs, t, w, x_frame)
+        # find fundamental frequency
+        f0_this = peaks.find_fundamental_twm(ipfreq, ipmag, f0et, minf0, maxf0, f0_prev)
+        f0_prev = f0_this if is_f0_stable(f0_this, f0_prev) else 0
+        fundamental_freqs = np.append(fundamental_freqs, f0_this)
+    return fundamental_freqs
 
 
 def find_harmonics(pfreq, pmag, pphase, f0, nH, hfreqp, fs, harmDevSlope=0.01):
@@ -201,3 +190,24 @@ def find_harmonics(pfreq, pmag, pphase, f0, nH, hfreqp, fs, harmDevSlope=0.01):
             hphase[hi] = pphase[pei]  # harmonic phases
         hi += 1  # increase harmonic index
     return hfreq, hmag, hphase
+
+
+def find_peaks(N, fs, t, w, x_frame):
+    # compute dft
+    mX, pX = dft.from_audio(x_frame, w, N)
+    # detect peak locations
+    ploc = peaks.find_peaks(mX, t)
+    iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values
+    ipfreq = fs * iploc / N  # convert locations to Hz
+    return ipfreq, ipmag, ipphase
+
+
+def is_f0_stable(f0, f0_prev):
+    """
+    Indicates whether a fundamental frequency in this frame is stable
+    (if it does not deviate much from the previous one).
+
+    :param f0: fundamental frequency in this frame (0 if not stable)
+    :param f0_prev: fundamental frequency in previous frame (0 if not stable)
+    """
+    return ((f0_prev == 0) & (f0 > 0)) or ((f0_prev > 0) & (np.abs(f0_prev - f0) < f0_prev / 5.0))
