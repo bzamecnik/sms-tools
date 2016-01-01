@@ -2,7 +2,7 @@ import numpy as np
 from scipy.fftpack import fft, ifft, fftshift
 from scipy.signal import resample, blackmanharris, triang
 
-import utilFunctions_C.utilFunctions_C as UF_C
+from .utilFunctions_C import utilFunctions_C as UF_C
 
 
 def subtract_sinusoids(x, N, H, sfreq, smag, sphase, fs):

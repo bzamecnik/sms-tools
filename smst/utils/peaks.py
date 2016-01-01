@@ -1,6 +1,6 @@
 import numpy as np
 
-import utilFunctions_C.utilFunctions_C as UF_C
+from .utilFunctions_C import utilFunctions_C as UF_C
 
 
 def find_peaks(mX, t):

@@ -1,7 +1,7 @@
 import numpy as np
 
 from .window import blackman_harris_lobe
-import utilFunctions_C.utilFunctions_C as UF_C
+from .utilFunctions_C import utilFunctions_C as UF_C
 
 
 def spectrum_for_sinusoids(ipfreq, ipmag, ipphase, N, fs):
