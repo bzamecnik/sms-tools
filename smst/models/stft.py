@@ -15,22 +15,18 @@ def from_audio(x, w, N, H):
     x: input array sound, w: analysis window, N: FFT size, H: hop size
     returns xmX, xpX: magnitude and phase spectra
     """
-    if (H <= 0):  # raise error if hop size 0 or negative
+    if H <= 0:
         raise ValueError("Hop size (H) smaller or equal to 0")
 
-    M = w.size  # size of analysis window
-    hM1, hM2 = dft.half_window_sizes(M)
+    hM1, hM2 = dft.half_window_sizes(w.size)
     x_padded = pad_signal(x, hM2)
     w = w / sum(w)  # normalize analysis window
-    for frame_index, x1 in enumerate(iterate_analysis_frames(x_padded, H, hM1, hM2)):
-        mX, pX = dft.from_audio(x1, w, N)  # compute dft
-        if frame_index == 0:  # if first frame create output arrays
-            xmX = np.array([mX])
-            xpX = np.array([pX])
-        else:  # append output to existing array
-            xmX = np.vstack((xmX, np.array([mX])))
-            xpX = np.vstack((xpX, np.array([pX])))
-    return xmX, xpX
+    mag_spectrogram, phase_spectrogram = [], []
+    for x_frame in iterate_analysis_frames(x_padded, H, hM1, hM2):
+        mag_spectrum, phase_spectrum = dft.from_audio(x_frame, w, N)
+        mag_spectrogram.append(mag_spectrum)
+        phase_spectrogram.append(phase_spectrum)
+    return np.vstack(mag_spectrogram), np.vstack(phase_spectrogram)
 
 
 def to_audio(mY, pY, M, H):
