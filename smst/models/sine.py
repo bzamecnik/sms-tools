@@ -220,31 +220,37 @@ def track_sinusoids(pfreq, pmag, pphase, tfreq, freqDevOffset=20, freqDevSlope=0
     return tfreqn, tmagn, tphasen
 
 
-def clean_sinusoid_tracks(tfreq, minTrackLength=3):
+def clean_sinusoid_tracks(track_freqs, min_frames=3):
     """
     Deletes short fragments of a collection of sinusoidal tracks.
 
-    :param tfreq: frequency of tracks
-    :param minTrackLength: minimum duration of tracks in number of frames
-    :returns: tfreqn: output frequency of tracks
+    :param track_freqs: frequencies of sinusoidal tracks
+    :param min_frames: minimum duration of a track (in number of frames)
+    :returns: cleaned frequencies of tracks
     """
 
     # number of frames, number of tracks in a frame
-    nFrames, nTracks = tfreq.shape
-    if nTracks == 0:  # if no tracks return input
-        return tfreq
-    for t in range(nTracks):  # iterate over all tracks
-        trackFreqs = tfreq[:, t]  # frequencies of one track
-        trackBegs = np.nonzero((trackFreqs[:nFrames - 1] <= 0)  # beginning of track contours
-                               & (trackFreqs[1:] > 0))[0] + 1
-        if trackFreqs[0] > 0:
-            trackBegs = np.insert(trackBegs, 0, 0)
-        trackEnds = np.nonzero((trackFreqs[:nFrames - 1] > 0)  # end of track contours
-                               & (trackFreqs[1:] <= 0))[0] + 1
-        if trackFreqs[nFrames - 1] > 0:
-            trackEnds = np.append(trackEnds, nFrames - 1)
-        trackLengths = 1 + trackEnds - trackBegs  # lengths of track contours
-        for i, j in zip(trackBegs, trackLengths):  # delete short track contours
-            if j <= minTrackLength:
-                trackFreqs[i:i + j] = 0
-    return tfreq
+    frame_count, track_count = track_freqs.shape
+
+    if track_count == 0:  # if no tracks return input
+        return track_freqs
+
+    # iterate over all tracks
+    for track_index in range(track_count):
+        # frequencies of one track
+        freqs = track_freqs[:, track_index]
+        # beginning of track contours
+        starts = np.nonzero((freqs[:frame_count - 1] <= 0) & (freqs[1:] > 0))[0] + 1
+        if freqs[0] > 0:
+            starts = np.insert(starts, 0, 0)
+        # end of track contours
+        ends = np.nonzero((freqs[:frame_count - 1] > 0) & (freqs[1:] <= 0))[0] + 1
+        if freqs[frame_count - 1] > 0:
+            ends = np.append(ends, frame_count - 1)
+        # lengths of track contours
+        lengths = 1 + ends - starts
+        # delete short track contours
+        for start, length in zip(starts, lengths):
+            if length <= min_frames:
+                freqs[start:start + length] = 0
+    return track_freqs
