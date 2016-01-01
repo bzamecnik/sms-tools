@@ -118,6 +118,8 @@ def scale_frequencies(hfreq, hmag, freqScaling, freqStretching, timbrePreservati
 
 # -- supporting function --
 
+# TODO: this function is not used anywhere, should it be part of the API?
+
 def find_fundamental_freq(x, fs, w, N, H, t, minf0, maxf0, f0et):
     """
     Finds fundamental frequencies of a sound using the TWM (Two-Way Mismatch) algorithm.
