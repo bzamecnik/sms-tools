@@ -3,7 +3,6 @@ from scipy.signal import get_window
 
 from smst.models import dft
 
-
 def test_simple_sinusoid():
     window_size = 1024
     t = np.linspace(0, 1, window_size)

@@ -1,15 +1,18 @@
 import math
+
 import numpy as np
 from scipy.signal import get_window
 
+from smst.ui import demo_sound_path
 from smst.utils.math import rmse
 from smst.utils import audio
 from smst.models import stft
 
+
 # TODO: the test needs fixing after the model is fixed
 
 def test_reconstruct_sound():
-    fs, x = audio.read_wav("../sounds/sax-phrase-short.wav")
+    fs, x = audio.read_wav(demo_sound_path("sax-phrase-short.wav"))
 
     window_size, fft_size, hop_size = 4001, 4096, 2048
     window = get_window('hamming', window_size)
