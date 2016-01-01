@@ -20,7 +20,7 @@ def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, min
     :param t: threshold in negative dB
     :param nH: maximum number of harmonics
     :param minf0: minimum f0 frequency in Hz
-    :param maxf0: maximim f0 frequency in Hz
+    :param maxf0: maximum f0 frequency in Hz
     :param f0et: error threshold in the f0 detection (ex: 5)
     :param harmDevSlope: slope of harmonic deviation
     :param minSineDur: minimum length of harmonics
@@ -116,7 +116,7 @@ def find_fundamental_freq(x, fs, w, N, H, t, minf0, maxf0, f0et):
     :param N: FFT size
     :param t: threshold in negative dB
     :param minf0: minimum f0 frequency in Hz
-    :param maxf0: maximim f0 frequency in Hz
+    :param maxf0: maximum f0 frequency in Hz
     :param f0et: error threshold in the f0 detection (ex: 5)
     :returns: f0: fundamental frequency
     """

@@ -14,7 +14,7 @@ from smst.models import stft
 def f0Yin(x, N, H, minf0, maxf0):
     # fundamental frequency detection using the Yin algorithm
     # x: input sound, N: window size,
-    # minf0: minimum f0 frequency in Hz, maxf0: maximim f0 frequency in Hz,
+    # minf0: minimum f0 frequency in Hz, maxf0: maximum f0 frequency in Hz,
     # returns f0
 
     spectrum = ess.Spectrum(size=N)
