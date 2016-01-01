@@ -99,48 +99,6 @@ def to_audio(tfreq, tmag, tphase, N, H, fs):
     y = np.delete(y, range(y.size - hN, y.size))  # delete half of the last window
     return y
 
-
-def reconstruct(x, fs, w, N, t):
-    """
-    Analysis/synthesis of a sound using the sinusoidal model, without sine tracking
-    x: input array sound, w: analysis window, N: size of complex spectrum, t: threshold in negative dB
-    returns y: output array sound
-    """
-
-    hM1 = int(math.floor((w.size + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(w.size / 2))  # half analysis window size by floor
-    Ns = 512  # FFT size for synthesis (even)
-    H = Ns / 4  # Hop size used for analysis and synthesis
-    hNs = Ns / 2  # half of synthesis FFT size
-    pin = max(hNs, hM1)  # init sound pointer in middle of anal window
-    pend = x.size - max(hNs, hM1)  # last sample to start a frame
-    fftbuffer = np.zeros(N)  # initialize buffer for FFT
-    yw = np.zeros(Ns)  # initialize output sound frame
-    y = np.zeros(x.size)  # initialize output array
-    w = w / sum(w)  # normalize analysis window
-    sw = np.zeros(Ns)  # initialize synthesis window
-    ow = triang(2 * H)  # triangular window
-    sw[hNs - H:hNs + H] = ow  # add triangular window
-    bh = blackmanharris(Ns)  # blackmanharris window
-    bh = bh / sum(bh)  # normalized blackmanharris window
-    sw[hNs - H:hNs + H] = sw[hNs - H:hNs + H] / bh[hNs - H:hNs + H]  # normalized synthesis window
-    while pin < pend:  # while input sound pointer is within sound
-        # -----analysis-----
-        x1 = x[pin - hM1:pin + hM2]  # select frame
-        mX, pX = dft.from_audio(x1, w, N)  # compute dft
-        ploc = peaks.find_peaks(mX, t)  # detect locations of peaks
-        iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values by interpolation
-        ipfreq = fs * iploc / float(N)  # convert peak locations to Hertz
-        # -----synthesis-----
-        Y = synth.spectrum_for_sinusoids(ipfreq, ipmag, ipphase, Ns, fs)  # generate sines in the spectrum
-        fftbuffer = np.real(ifft(Y))  # compute inverse FFT
-        yw[:hNs - 1] = fftbuffer[hNs + 1:]  # undo zero-phase window
-        yw[hNs - 1:] = fftbuffer[:hNs + 1]
-        y[pin - hNs:pin + hNs] += sw * yw  # overlap-add and apply a synthesis window
-        pin += H  # advance sound pointer
-    return y
-
-
 # functions that implement transformations using the sineModel
 
 def scale_time(sfreq, smag, timeScaling):

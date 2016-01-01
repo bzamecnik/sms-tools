@@ -58,39 +58,6 @@ def to_audio(mY, pY, M, H):
     y = np.delete(y, range(y.size - hM1, y.size))  # delete the end of the sound
     return y
 
-
-def reconstruct(x, w, N, H):
-    """
-    Analysis/synthesis of a sound using the short-time Fourier transform
-    x: input sound, w: analysis window, N: FFT size, H: hop size
-    returns y: output sound
-    """
-
-    if H <= 0:  # raise error if hop size 0 or negative
-        raise ValueError("Hop size (H) smaller or equal to 0")
-
-    M = w.size  # size of analysis window
-    hM1 = int(math.floor((M + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(M / 2))  # half analysis window size by floor
-    x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
-    x = np.append(x, np.zeros(hM1))  # add zeros at the end to analyze last sample
-    pin = hM1  # initialize sound pointer in middle of analysis window
-    pend = x.size - hM1  # last sample to start a frame
-    w = w / sum(w)  # normalize analysis window
-    y = np.zeros(x.size)  # initialize output array
-    while pin <= pend:  # while sound pointer is smaller than last sample
-        # -----analysis-----
-        x1 = x[pin - hM1:pin + hM2]  # select one frame of input sound
-        mX, pX = dft.from_audio(x1, w, N)  # compute dft
-        # -----synthesis-----
-        y1 = dft.to_audio(mX, pX, M)  # compute idft
-        y[pin - hM1:pin + hM2] += H * y1  # overlap-add to generate output sound
-        pin += H  # advance sound pointer
-    y = np.delete(y, range(hM2))  # delete half of first window
-    y = np.delete(y, range(y.size - hM1, y.size))  # delete half of the last window
-    return y
-
-
 # functions that implement transformations using the stft
 
 # NOTE: the following transformations work directly with audio input and output

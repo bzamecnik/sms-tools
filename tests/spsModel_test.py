@@ -47,18 +47,3 @@ def test_reconstruct_sound():
     assert np.allclose(0.0043912712540510645, rmse(x[:len(x_reconstructed)], x_sine))
     assert np.allclose(0.093780097561056638, rmse(x[:len(x_reconstructed)], x_stochastic[:len(x_reconstructed)]))
     assert np.allclose(0.0, rmse(x_sine + x_stochastic[:len(x_reconstructed)], x_reconstructed))
-
-    x_dir_reconstructed, x_dir_sine, x_dir_stochastic = sps.reconstruct(x, fs, window, fft_size, hop_size, stocf=0.5)
-
-    assert len(x) == len(x_dir_reconstructed)
-    assert len(x) == len(x_dir_sine)
-    assert len(x) == len(x_dir_stochastic)
-
-    # the reconstruction via from_audio()/to_audio() and reconstruct() should be equal
-    assert np.allclose(0.097365723128058135, rmse(x, x_dir_reconstructed[:len(x)]))
-    # should be 0.0 and have equal length
-    assert np.allclose(0.098858704292232355, rmse(x_reconstructed[:138624], x_dir_reconstructed[:138624]))
-
-    print(len(x_sine), len(x_dir_sine), len(x_dir_reconstructed))
-    assert np.allclose(0.095079400460480551, rmse(x_sine[:138624], x_dir_sine[:138624]))
-    assert np.allclose(0.024545487209381656, rmse(x_stochastic[:138624], x_dir_stochastic[:138624]))

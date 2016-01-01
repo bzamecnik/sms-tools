@@ -37,13 +37,3 @@ def test_reconstruct_sound():
     assert 69 * 2048 == len(x_reconstructed)
 
     assert np.allclose(0.010812475879315771, rmse(x, x_reconstructed[:len(x)]))
-
-    x_reconstructed_directly = sine.reconstruct(x, fs, window, fft_size, hop_size)
-
-    assert len(x) == len(x_reconstructed_directly)
-
-    # the reconstruction via from_audio()/to_audio() and reconstruct() should be equal
-    # TODO: this is really bad!
-    assert np.allclose(0.0937097119285, rmse(x, x_reconstructed_directly))
-    # should be 0.0
-    assert np.allclose(0.088438646316887845, rmse(x_reconstructed[:len(x)], x_reconstructed_directly))

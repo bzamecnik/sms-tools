@@ -17,7 +17,3 @@ def test_simple_sinusoid():
     assert round(mag_spectrum.max()) == -6
     assert round(mag_spectrum.mean()) == -147
     assert np.allclose(x_reconstructed, x * window)
-
-    x_reconstructed_by_model = dft.reconstruct(x, window, window_size)
-
-    assert np.allclose(x_reconstructed_by_model, x * window)

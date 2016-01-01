@@ -60,65 +60,6 @@ def from_audio(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, min
     xhfreq = sine.clean_sinusoid_tracks(xhfreq, round(fs * minSineDur / H))  # delete tracks shorter than minSineDur
     return xhfreq, xhmag, xhphase
 
-
-def reconstruct(x, fs, w, N, t, nH, minf0, maxf0, f0et):
-    """
-    Analysis/synthesis of a sound using the sinusoidal harmonic model
-    x: input sound, fs: sampling rate, w: analysis window,
-    N: FFT size (minimum 512), t: threshold in negative dB,
-    nH: maximum number of harmonics, minf0: minimum f0 frequency in Hz,
-    maxf0: maximim f0 frequency in Hz,
-    f0et: error threshold in the f0 detection (ex: 5),
-    returns y: output array sound
-    """
-
-    hM1 = int(math.floor((w.size + 1) / 2))  # half analysis window size by rounding
-    hM2 = int(math.floor(w.size / 2))  # half analysis window size by floor
-    x = np.append(np.zeros(hM2), x)  # add zeros at beginning to center first window at sample 0
-    x = np.append(x, np.zeros(hM1))  # add zeros at the end to analyze last sample
-    Ns = 512  # FFT size for synthesis (even)
-    H = Ns / 4  # Hop size used for analysis and synthesis
-    hNs = Ns / 2
-    pin = max(hNs, hM1)  # init sound pointer in middle of anal window
-    pend = x.size - max(hNs, hM1)  # last sample to start a frame
-    yh = np.zeros(Ns)  # initialize output sound frame
-    y = np.zeros(x.size)  # initialize output array
-    w = w / sum(w)  # normalize analysis window
-    sw = np.zeros(Ns)  # initialize synthesis window
-    ow = triang(2 * H)  # overlapping window
-    sw[hNs - H:hNs + H] = ow
-    bh = blackmanharris(Ns)  # synthesis window
-    bh = bh / sum(bh)  # normalize synthesis window
-    sw[hNs - H:hNs + H] = sw[hNs - H:hNs + H] / bh[hNs - H:hNs + H]  # window for overlap-add
-    hfreqp = []
-    f0stable = 0
-    while pin < pend:
-        # -----analysis-----
-        x1 = x[pin - hM1:pin + hM2]  # select frame
-        mX, pX = dft.from_audio(x1, w, N)  # compute dft
-        ploc = peaks.find_peaks(mX, t)  # detect peak locations
-        iploc, ipmag, ipphase = peaks.interpolate_peaks(mX, pX, ploc)  # refine peak values
-        ipfreq = fs * iploc / N
-        f0t = peaks.find_fundamental_twm(ipfreq, ipmag, f0et, minf0, maxf0, f0stable)  # find f0
-        if ((f0stable == 0) & (f0t > 0)) \
-                or ((f0stable > 0) & (np.abs(f0stable - f0t) < f0stable / 5.0)):
-            f0stable = f0t  # consider a stable f0 if it is close to the previous one
-        else:
-            f0stable = 0
-        hfreq, hmag, hphase = find_harmonics(ipfreq, ipmag, ipphase, f0t, nH, hfreqp, fs)  # find harmonics
-        hfreqp = hfreq
-        # -----synthesis-----
-        Yh = synth.spectrum_for_sinusoids(hfreq, hmag, hphase, Ns, fs)  # generate spec sines
-        fftbuffer = np.real(ifft(Yh))  # inverse FFT
-        yh[:hNs - 1] = fftbuffer[hNs + 1:]  # undo zero-phase window
-        yh[hNs - 1:] = fftbuffer[:hNs + 1]
-        y[pin - hNs:pin + hNs] += sw * yh  # overlap-add
-        pin += H  # advance sound pointer
-    y = np.delete(y, range(hM2))  # delete half of first window
-    y = np.delete(y, range(y.size - hM1, y.size))  # add zeros at the end to analyze last sample
-    return y
-
-
 # transformations applied to the harmonics of a sound
 
 def scale_frequencies(hfreq, hmag, freqScaling, freqStretching, timbrePreservation, fs):

@@ -31,9 +31,3 @@ def test_reconstruct_sound():
     assert expected_frame_count * hop_size == len(x_reconstructed)
 
     assert np.allclose(0.0014030089623073237, rmse(x, x_reconstructed[:len(x)]))
-
-    x_reconstructed_directly = stft.reconstruct(x, window, fft_size, hop_size)
-
-    assert len(x) == len(x_reconstructed_directly)
-    # the reconstruction via from_audio()/to_audio() and reconstruct() should be equal
-    assert np.allclose(x_reconstructed[:len(x)], x_reconstructed_directly)

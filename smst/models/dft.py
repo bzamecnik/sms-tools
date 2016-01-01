@@ -66,24 +66,6 @@ def to_audio(magnitude_db_spectrum, phase_spectrum, window_size):
     samples = unapply_zero_phase_window(fft_buffer, window_size)
     return samples
 
-
-def reconstruct(samples, window, fft_size):
-    """
-    Reconstructs a windowed signal by analyzing and synthesizing it
-    using the DFT model.
-
-    :param samples: input signal before applying a window
-    :param window: analysis/synthesis window
-    :param fft_size: size of the spectrum (power of two)
-
-    :returns: samples: reconstructed windowed signal
-    """
-
-    mag_spectrum, phase_spectrum = from_audio(samples, window, fft_size)
-    samples = to_audio(mag_spectrum, phase_spectrum, window.size)
-    return samples
-
-
 # -- support functions --
 
 

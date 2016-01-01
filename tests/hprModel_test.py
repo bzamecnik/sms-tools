@@ -44,20 +44,3 @@ def test_reconstruct_sound():
 
     assert np.allclose(2.1079553110776107e-17, rmse(x[:len(x_reconstructed)], x_reconstructed))
     assert np.allclose(0.025543282494159769, rmse(x[:len(x_reconstructed)], x_sine))
-
-    x_dir_reconstructed, x_dir_sine, x_dir_residual = hpr.reconstruct(
-        x, fs, window, fft_size, t=-80,
-        nH=20, minf0=100, maxf0=2000, f0et=5)
-
-    assert len(x) == len(x_dir_reconstructed)
-    assert len(x) == len(x_dir_sine)
-    assert len(x) == len(x_dir_residual)
-
-    # the reconstruction via from_audio()/to_audio() and reconstruct() should be equal
-    assert np.allclose(0.014037759480944659, rmse(x, x_dir_reconstructed[:len(x)]))
-    # should be 0.0 and have equal length
-    assert np.allclose(0.014043933504228221, rmse(x_reconstructed[:138624], x_dir_reconstructed[:138624]))
-
-    print(len(x_sine), len(x_dir_sine), len(x_dir_reconstructed))
-    assert np.allclose(0.026058819895416748, rmse(x_sine[:138624], x_dir_sine[:138624]))
-    assert np.allclose(0.022740956489364486, rmse(x_residual[:138624], x_dir_residual[:138624]))
