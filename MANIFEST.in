@@ -1,1 +1,2 @@
-include smst/utils/utilFunctions_C/utilFunctions.h
+include smst/utils/utilFunctions_C/spec_synth.h
+include smst/utils/utilFunctions_C/twm.h

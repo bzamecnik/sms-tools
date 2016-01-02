@@ -25,17 +25,20 @@ import re
 #     long_description = f.read()
 
 # Cython extensions
-sourcefiles = [
-    'smst/utils/utilFunctions_C/utilFunctions.c',
-    'smst/utils/utilFunctions_C/cutilFunctions.pyx'
+ext_modules = [
+    Extension(
+        'smst.utils.utilFunctions_C.spec_synth',
+        ['smst/utils/utilFunctions_C/spec_synth_cython.pyx', 'smst/utils/utilFunctions_C/spec_synth.c'],
+        libraries=['m'],
+        include_dirs=[np.get_include()]
+    ),
+    Extension(
+        'smst.utils.utilFunctions_C.twm',
+        ['smst/utils/utilFunctions_C/twm_cython.pyx', 'smst/utils/utilFunctions_C/twm.c'],
+        libraries=['m'],
+        include_dirs=[np.get_include()]
+    )
 ]
-ext_modules = [Extension(
-    'smst.utils.utilFunctions_C.utilFunctions_C',
-    sourcefiles,
-    libraries=['m'],
-    # include_dirs=py_inc + np_inc
-    include_dirs=[np.get_include()]
-)]
 
 def read_version():
     """

@@ -1,6 +1,6 @@
 import numpy as np
 
-from .utilFunctions_C import utilFunctions_C as UF_C
+from .utilFunctions_C import twm as UF_C
 from .math import from_db_magnitudes
 
 def find_peaks(mX, t):
