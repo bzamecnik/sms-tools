@@ -16,6 +16,10 @@ import sys
 import os
 import shlex
 
+# Run sphinx-apidoc automatically to generate all the API documentation
+# files (smst*.rst).
+os.system('sphinx-apidoc -f -e -o . ../smst ../smst/ui/ ../smst/utils/utilFunctions_C/')
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
