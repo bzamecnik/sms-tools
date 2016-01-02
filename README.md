@@ -168,7 +168,7 @@ audio -> [analysis] -> model -> [synthesis] -> reconstructed audio
 
 A model provides a different representation of audio than the time-domain samples. The models live as modules in the `smst` package.
 
-Each model typically has a `fromAudio()` method which performs analysis and a `toAudio()` method which performs synthesis.
+Each model typically has a `from_audio()` method which performs analysis and a `to_audio()` method which performs synthesis.
 
 - `dft` - [Discrete Fourier Transform](smst/models/dft.py) - spectrum of a single frame
 - `stft` - [Short-time Fourier Transform](smst/models/stft.py) - spectrogram
@@ -192,32 +192,23 @@ Audio can be transformed by modifying its model. Each transformation belongs to 
   - `filter()`
   - `morph()`
 - `sine` - [Sinusoidal transformations](smst/models/sine.py)
-  - `scaleTime()`
-  - `scaleFrequencies()`
+  - `scale_ime()`
+  - `scale_frequencies()`
 - `harmonic` - [Harmonic transformations](smst/models/harmonic.py)
-  - `scaleFrequencies()`
+  - `scale_frequencies()`
 - `stochastic` - [Stochastic transformations](smst/models/stochastic.py)
-  - `scaleTime()`
+  - `scale_time()`
 - `hps` - [Harmonic + stochastic transformations](smst/models/hps.py)
-  - `scaleTime()`
+  - `scale_time()`
   - `morph()`
 
 ## Documentation
 
-The current [documentation](http://smst.readthedocs.org/en/latest/) is hosted on ReadTheDocs.org.
+The current [documentation](https://smst.readthedocs.org/en/latest/) is hosted on ReadTheDocs.org.
 
 ### How to generate documentation?
 
 In case you want to manually generate the documentation using Sphinx take the following steps.
-
-Regenerate the API reference into RST (reStructuredText) files.
-
-```
-sms-tools$ cd docs/
-docs$ make apidoc
-```
-
-Build the documentation from RST into HTML.
 
 ```
 sms-tools$ python setup.py build_sphinx
