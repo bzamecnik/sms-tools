@@ -109,6 +109,11 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
+# Try avoiding the following error:
+# smst.rst:7: WARNING: toctree contains reference to nonexisting document u'smst.models'
+# http://stackoverflow.com/questions/12206334/sphinx-autosummary-toctree-contains-reference-to-nonexisting-document-warnings
+numpydoc_show_class_members = False
+
 
 # -- Options for HTML output ----------------------------------------------
 
