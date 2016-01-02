@@ -109,11 +109,26 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
-# Try avoiding the following error:
-# smst.rst:7: WARNING: toctree contains reference to nonexisting document u'smst.models'
-# http://stackoverflow.com/questions/12206334/sphinx-autosummary-toctree-contains-reference-to-nonexisting-document-warnings
-numpydoc_show_class_members = False
+# Mock the modules with C code
+# http://blog.rtwilson.com/how-to-make-your-sphinx-documentation-compile-with-readthedocs-when-youre-using-numpy-and-scipy/
 
+import mock
+
+mock_modules = [
+    'matplotlib',
+    'matplotlib.pyplot',
+    'numpy',
+    'scipy',
+    'scipy.fftpack',
+    'scipy.interpolate',
+    'scipy.io',
+    'scipy.io.wavfile',
+    'scipy.signal',
+    'smst.utils.utilFunctions_C',
+    'smst.utils.utilFunctions_C.utilFunctions_C'
+]
+for module in mock_modules:
+    sys.modules[module] = mock.Mock()
 
 # -- Options for HTML output ----------------------------------------------
 
