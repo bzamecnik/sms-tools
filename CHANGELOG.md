@@ -1,6 +1,12 @@
 # Changelog
 
-## Next release
+## 0.3.1 (2015-01-02)
+
+- a lot code has been refactored
+- properly formatted docstrings in the models code
+- working [Travis CI build](https://travis-ci.org/bzamecnik/sms-tools) and
+  [ReadTheDocs documentation](https://smst.readthedocs.org/)
+- basic self-contained regression test for models
 
 ## 0.3.0 (2015-12-30)
 
