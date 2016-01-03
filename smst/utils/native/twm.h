@@ -1,4 +1,4 @@
-// Two-way mismatch algorithm for detection of harmonics.
+// Two-way mismatch algorithm for detection of fundamental frequency.
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,4 +1,6 @@
-#this is a cython wrapper on C functions to call them in python
+"""
+Two-way mismatch algorithm for detection of fundamental frequency.
+"""
 
 import numpy as np
 cimport numpy as np
@@ -9,8 +11,15 @@ np.import_array()
 
 
 def twm(pfreq, pmag, f0c):
-    """This is a cython wrapper for a C function which is bit exact with the python version of this function
-       For information about the input arguments please refere to the original python function
+    """
+    Find fundamental frequency
+
+    This is a native implementation of smst.utils.peaks.find_fundamental_twm_py.
+
+    :param pfreq: peak frequencies in Hz
+    :param pmag: peak magnitudes
+    :param f0c: frequencies of f0 candidates
+    :returns: f0, f0Error: fundamental frequency detected and its error
     """
     
     

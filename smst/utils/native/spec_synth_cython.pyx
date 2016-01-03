@@ -1,4 +1,6 @@
-#this is a cython wrapper on C functions to call them in python
+"""
+Spectral synthesis of sinusoids.
+"""
 
 import numpy as np
 cimport numpy as np
@@ -9,7 +11,9 @@ np.import_array()
 
 
 def genbh92lobe(x):
-    "comments"
+    """
+    Generates the main lobe of a Blackman-Harris window.
+    """
     
     cdef np.ndarray[np.float_t, ndim=1] x_arr
     cdef np.ndarray[np.float_t, ndim=1] y_arr
@@ -20,13 +24,21 @@ def genbh92lobe(x):
     
     genbh92lobe_C(<double *>x_arr.data,<double *>y_arr.data, x_arr.shape[0])
 
-    
     return y_arr
+
     
-    
-    
-def genSpecSines(iploc, ipmag, ipphase,N):
-    "comments"
+def genSpecSines(iploc, ipmag, ipphase, N):
+    """
+    Synthesizes signal from a model of sinusoids in the spectral domain.
+
+    This is a native implementation of smst.utils.synth.spectrum_for_sinusoids_py().
+
+    :param ipfreq: sine peaks frequencies
+    :param ipmag: sine peaks magnitudes
+    :param ipphase: sine peaks phases
+    :param N: size of the complex spectrum to generate
+    :returns: Y: generated complex spectrum of sines
+    """
     
     cdef np.ndarray[np.float_t, ndim=1] iploc_arr
     cdef np.ndarray[np.float_t, ndim=1] ipmag_arr
