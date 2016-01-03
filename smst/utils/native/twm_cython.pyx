@@ -36,6 +36,14 @@ def twm(pfreq, pmag, f0c):
     pmag_arr = np.ascontiguousarray(pmag, dtype=np.float)
     f0c_arr = np.ascontiguousarray(f0c, dtype=np.float)
 
-    TWM_C(<double*>pfreq_arr.data, <double *>pmag_arr.data, pfreq_arr.shape[0], <double *>f0c_arr.data, f0c_arr.shape[0], <double*>f0_arr.data, <double*>f0Error_arr.data)
+    TWM_C(
+        <double*>pfreq_arr.data,
+        <double *>pmag_arr.data,
+        pfreq_arr.shape[0],
+        <double *>f0c_arr.data,
+        f0c_arr.shape[0],
+        <double*>f0_arr.data,
+        <double*>f0Error_arr.data
+    )
 
     return f0_arr[0], f0Error_arr[0]

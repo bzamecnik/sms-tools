@@ -53,7 +53,15 @@ def genSpecSines(iploc, ipmag, ipphase, N):
     real_arr = np.zeros((N,), dtype=np.float)
     imag_arr = np.zeros((N,), dtype=np.float)
         
-    genspecsines_C(<double *>iploc_arr.data, <double *>ipmag_arr.data, <double *>ipphase_arr.data, iploc_arr.shape[0],  <double *>real_arr.data,  <double *>imag_arr.data, N)
+    genspecsines_C(
+        <double *>iploc_arr.data,
+        <double *>ipmag_arr.data,
+        <double *>ipphase_arr.data,
+        iploc_arr.shape[0],
+        <double *>real_arr.data,
+        <double *>imag_arr.data,
+        N
+    )
     
     out = real_arr.astype(complex)
     out.imag = imag_arr
