@@ -2,7 +2,7 @@ import numpy as np
 from scipy.fftpack import fft, ifft, fftshift
 from scipy.signal import resample, blackmanharris, triang
 
-from .utilFunctions_C import spec_synth
+from .native import spec_synth
 from .math import to_db_magnitudes
 
 def subtract_sinusoids(x, N, H, sfreq, smag, sphase, fs):

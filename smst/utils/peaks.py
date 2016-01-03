@@ -1,6 +1,6 @@
 import numpy as np
 
-from .utilFunctions_C.twm import twm as native_twm
+from .native.twm import twm as native_twm
 from .math import from_db_magnitudes
 
 def find_peaks(mX, t):

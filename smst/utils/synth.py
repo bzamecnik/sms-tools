@@ -1,7 +1,7 @@
 import numpy as np
 
 from .window import blackman_harris_lobe
-from .utilFunctions_C import spec_synth
+from .native import spec_synth
 from .math import from_db_magnitudes
 
 def spectrum_for_sinusoids(ipfreq, ipmag, ipphase, N, fs):

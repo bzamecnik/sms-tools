@@ -27,14 +27,14 @@ import re
 # Cython extensions
 ext_modules = [
     Extension(
-        'smst.utils.utilFunctions_C.spec_synth',
-        ['smst/utils/utilFunctions_C/spec_synth_cython.pyx', 'smst/utils/utilFunctions_C/spec_synth.c'],
+        'smst.utils.native.spec_synth',
+        ['smst/utils/native/spec_synth_cython.pyx', 'smst/utils/native/spec_synth.c'],
         libraries=['m'],
         include_dirs=[np.get_include()]
     ),
     Extension(
-        'smst.utils.utilFunctions_C.twm',
-        ['smst/utils/utilFunctions_C/twm_cython.pyx', 'smst/utils/utilFunctions_C/twm.c'],
+        'smst.utils.native.twm',
+        ['smst/utils/native/twm_cython.pyx', 'smst/utils/native/twm.c'],
         libraries=['m'],
         include_dirs=[np.get_include()]
     )

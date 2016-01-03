@@ -18,7 +18,7 @@ import shlex
 
 # Run sphinx-apidoc automatically to generate all the API documentation
 # files (smst*.rst).
-os.system('sphinx-apidoc -f -e -o . ../smst ../smst/ui/ ../smst/utils/utilFunctions_C/')
+os.system('sphinx-apidoc -f -e -o . ../smst ../smst/ui/ ../smst/utils/native/')
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -128,9 +128,9 @@ mock_modules = [
     'scipy.io',
     'scipy.io.wavfile',
     'scipy.signal',
-    'smst.utils.utilFunctions_C',
-    'smst.utils.utilFunctions_C.twm',
-    'smst.utils.utilFunctions_C.spec_synth'
+    'smst.utils.native',
+    'smst.utils.native.twm',
+    'smst.utils.native.spec_synth'
 ]
 for module in mock_modules:
     sys.modules[module] = mock.Mock()

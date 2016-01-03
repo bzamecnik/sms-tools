@@ -51,7 +51,7 @@ help:
 	@echo "  coverage   to run coverage check of the documentation (if enabled)"
 
 apidoc:
-	$(SPHINXAPIDOC) -f -e -o . ../smst ../smst/ui/ ../smst/utils/utilFunctions_C/
+	$(SPHINXAPIDOC) -f -e -o . ../smst ../smst/ui/ ../smst/utils/native/
 
 clean:
 	rm -rf $(BUILDDIR)/*
