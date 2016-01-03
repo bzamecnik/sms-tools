@@ -1,7 +1,7 @@
 import numpy as np
 
 from .window import blackman_harris_lobe
-from .utilFunctions_C import spec_synth as UF_C
+from .utilFunctions_C import spec_synth
 from .math import from_db_magnitudes
 
 def spectrum_for_sinusoids(ipfreq, ipmag, ipphase, N, fs):
@@ -16,7 +16,7 @@ def spectrum_for_sinusoids(ipfreq, ipmag, ipphase, N, fs):
     :returns: Y: generated complex spectrum of sines
     """
 
-    Y = UF_C.genSpecSines(N * ipfreq / float(fs), ipmag, ipphase, N)
+    Y = spec_synth.genSpecSines(N * ipfreq / float(fs), ipmag, ipphase, N)
     return Y
 
 

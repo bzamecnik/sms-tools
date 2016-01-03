@@ -1,6 +1,6 @@
 import numpy as np
 
-from .utilFunctions_C import twm as UF_C
+from .utilFunctions_C.twm import twm as native_twm
 from .math import from_db_magnitudes
 
 def find_peaks(mX, t):
@@ -80,7 +80,7 @@ def find_fundamental_twm(pfreq, pmag, ef0max, minf0, maxf0, f0t=0):
     if (f0cf.size == 0):  # return 0 if no peak candidates
         return 0
 
-    f0, f0error = UF_C.twm(pfreq, pmag, f0cf)  # call the TWM function with peak candidates
+    f0, f0error = native_twm(pfreq, pmag, f0cf)  # call the TWM function with peak candidates
 
     if (f0 > 0) and (f0error < ef0max):  # accept and return f0 if below max error allowed
         return f0
@@ -91,7 +91,7 @@ def find_fundamental_twm(pfreq, pmag, ef0max, minf0, maxf0, f0t=0):
 def find_fundamental_twm_py(pfreq, pmag, f0c):
     """
     Two-way mismatch algorithm for f0 detection (by Beauchamp&Maher).
-    Better to use the C version of this function: UF_C.twm().
+    Better to use the C version of this function: native_twm().
 
     :param pfreq: peak frequencies in Hz
     :param pmag: peak magnitudes

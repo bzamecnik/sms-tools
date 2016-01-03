@@ -2,7 +2,7 @@ import numpy as np
 from scipy.fftpack import fft, ifft, fftshift
 from scipy.signal import resample, blackmanharris, triang
 
-from .utilFunctions_C import spec_synth as UF_C
+from .utilFunctions_C import spec_synth
 from .math import to_db_magnitudes
 
 def subtract_sinusoids(x, N, H, sfreq, smag, sphase, fs):
@@ -31,7 +31,7 @@ def subtract_sinusoids(x, N, H, sfreq, smag, sphase, fs):
     for l in range(L):
         xw = x[pin:pin + N] * w  # window the input sound
         X = fft(fftshift(xw))  # compute FFT
-        Yh = UF_C.genSpecSines(N * sfreq[l, :] / fs, smag[l, :], sphase[l, :], N)  # generate spec sines
+        Yh = spec_synth.genSpecSines(N * sfreq[l, :] / fs, smag[l, :], sphase[l, :], N)  # generate spec sines
         Xr = X - Yh  # subtract sines from original spectrum
         xrw = np.real(fftshift(ifft(Xr)))  # inverse FFT
         xr[pin:pin + N] += xrw * sw  # overlap-add
@@ -67,7 +67,7 @@ def subtract_sinusoids_with_stochastic_residual(x, N, H, sfreq, smag, sphase, fs
     for l in range(L):
         xw = x[pin:pin + N] * w  # window the input sound
         X = fft(fftshift(xw))  # compute FFT
-        Yh = UF_C.genSpecSines(N * sfreq[l, :] / fs, smag[l, :], sphase[l, :], N)  # generate spec sines
+        Yh = spec_synth.genSpecSines(N * sfreq[l, :] / fs, smag[l, :], sphase[l, :], N)  # generate spec sines
         Xr = X - Yh  # subtract sines from original spectrum
         mXr = to_db_magnitudes(Xr[:hN])  # magnitude spectrum of residual
         mXrenv = resample(np.maximum(-200, mXr), mXr.size * stocf)  # decimate the mag spectrum
