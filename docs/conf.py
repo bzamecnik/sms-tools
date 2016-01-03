@@ -129,7 +129,8 @@ mock_modules = [
     'scipy.io.wavfile',
     'scipy.signal',
     'smst.utils.utilFunctions_C',
-    'smst.utils.utilFunctions_C.utilFunctions_C'
+    'smst.utils.utilFunctions_C.twm',
+    'smst.utils.utilFunctions_C.spec_synth'
 ]
 for module in mock_modules:
     sys.modules[module] = mock.Mock()
