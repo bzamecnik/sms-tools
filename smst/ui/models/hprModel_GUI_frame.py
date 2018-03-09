@@ -6,7 +6,7 @@ import tkFileDialog
 import tkMessageBox
 
 from . import hprModel_function
-from smst.utils import audio
+from smst.utils import audio, files
 
 
 class HprModelFrame:
@@ -137,7 +137,7 @@ class HprModelFrame:
         output_label = "Sinusoidal:"
         Label(self.parent, text=output_label).grid(row=13, column=0, sticky=W, padx=5, pady=(10, 0))
         self.output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + strip_file(self.filelocation.get()) + '_hprModel_sines.wav'), bg="gray30",
+            'output_sounds/' + files.strip_file(self.filelocation.get()) + '_hprModel_sines.wav'), bg="gray30",
                              fg="white")
         self.output.grid(row=13, column=0, padx=(80, 5), pady=(10, 0), sticky=W)
 
@@ -145,7 +145,7 @@ class HprModelFrame:
         output_label = "Residual:"
         Label(self.parent, text=output_label).grid(row=14, column=0, sticky=W, padx=5, pady=(5, 0))
         self.output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + strip_file(self.filelocation.get()) + '_hprModel_residual.wav'), bg="gray30",
+            'output_sounds/' + files.strip_file(self.filelocation.get()) + '_hprModel_residual.wav'), bg="gray30",
                              fg="white")
         self.output.grid(row=14, column=0, padx=(80, 5), pady=(5, 0), sticky=W)
 
@@ -153,7 +153,7 @@ class HprModelFrame:
         output_label = "Output:"
         Label(self.parent, text=output_label).grid(row=15, column=0, sticky=W, padx=5, pady=(5, 15))
         self.output = Button(self.parent, text=">", command=lambda: audio.play_wav(
-            'output_sounds/' + strip_file(self.filelocation.get()) + '_hprModel.wav'), bg="gray30",
+            'output_sounds/' + files.strip_file(self.filelocation.get()) + '_hprModel.wav'), bg="gray30",
                              fg="white")
         self.output.grid(row=15, column=0, padx=(80, 5), pady=(5, 15), sticky=W)
 
